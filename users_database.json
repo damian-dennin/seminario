@@ -1,0 +1,27 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "firstName": "Juan Cruz",
+      "lastName": "Palacios",
+      "email": "jpalacios@alumno.huergo.edu.ar",
+      "username": "JuanCruzPalacios",
+      "password": "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92",
+      "skills": [],
+      "age": "",
+      "birthDate": "",
+      "languages": "",
+      "specialization": "",
+      "phone": "",
+      "linkedin": "",
+      "github": "",
+      "portfolio": "",
+      "bio": "",
+      "status": "Disponible",
+      "certifications": [],
+      "interests": [],
+      "created_at": "2025-06-18 16:28:54",
+      "updated_at": "2025-06-18 16:28:54"
+    }
+  ]
+}

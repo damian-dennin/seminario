@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/styles/auth.css">
+    <title>Stackr - Iniciar Sesión</title>
+</head>
+<body>
+    <!-- Header con logo y toggle -->
+    <div class="auth-header">
+        <div class="logo-container">
+            <img src="/static/imagenes/logoStackr.png" alt="Logo Tomber Sur" class="logo-img">
+        </div>
+        <label class="toggle-switch">
+            <input type="checkbox" id="theme-toggle">
+            <span class="slider"></span>
+        </label>
+    </div>
+
+    <!-- Contenedor principal -->
+    <div class="auth-container">
+        <!-- Sección de presentación -->
+        <div class="presentation-section">
+            <div class="hero-content">
+				<h1 class="hero-title">¿Quienes somos?</h1>
+				<div class="intro-section">
+					<p class="intro-text">
+						<strong>Stackr</strong> es una red social pensada para conectar a personas con ideas, talento y ganas de crecer en el mundo tecnológico. 
+						Nuestra plataforma facilita que programadores, diseñadores, emprendedores, marketers, escritores y otros profesionales puedan encontrar o crear proyectos colaborativos reales, sin importar su nivel de experiencia.
+						<br><br>
+						¿Tenés una idea y necesitás un equipo? ¿Querés sumarte a un proyecto para aprender, practicar o ganar experiencia? 
+						Stackr está diseñado para vos. A través de un sistema de emparejamiento estilo “Tinder de talentos”, podés descubrir oportunidades compatibles con tus intereses y empezar a colaborar en pocos clics.
+						<br><br>
+						Creamos un espacio donde lo importante es el potencial: el potencial de tu perfil, de tu idea y de lo que pueden lograr juntos. Porque creemos que los grandes proyectos no siempre empiezan con grandes presupuestos, sino con mentes conectadas por un mismo objetivo.
+					</p>
+				</div>
+                <h1 class="hero-title">Encuentra tu próximo proyecto</h1>
+                <p class="hero-subtitle">Conecta con desarrolladores apasionados y colabora en proyectos increíbles</p>
+
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">🚀</div>
+                        <h3>Proyectos Innovadores</h3>
+                        <p>Descubre una amplia variedad de proyectos en desarrollo esperando tu talento</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">👥</div>
+                        <h3>Colaboración Real</h3>
+                        <p>Conecta con equipos de todo el mundo y forma parte de algo grande</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🛠️</div>
+                        <h3>Todas las Tecnologías</h3>
+                        <p>Desde Python hasta React, encuentra proyectos con tu stack favorito</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🌐</div>
+                        <h3>Experiencia Global</h3>
+                        <p>Trabajá en proyectos internacionales y expandí tu red profesional sin fronteras</p>
+                    </div>
+                </div>
+
+                <!-- Testimonios -->
+                <div class="testimonials-section">
+                    <h3 class="testimonials-title">Lo que dicen nuestros usuarios</h3>
+                    <div class="testimonials-grid">
+                        <div class="testimonial-card">
+                            <div class="testimonial-stars">⭐⭐⭐⭐⭐</div>
+                            <p>"Encontré mi equipo ideal en Stackr. Ahora trabajamos en un proyecto que realmente nos apasiona."</p>
+                            <div class="testimonial-author">- Ana García, Frontend Developer</div>
+                        </div>
+                        <div class="testimonial-card">
+                            <div class="testimonial-stars">⭐⭐⭐⭐⭐</div>
+                            <p>"La plataforma me ayudó a encontrar colaboradores perfectos para mi startup. ¡Increíble experiencia!"</p>
+                            <div class="testimonial-author">- Carlos López, Full Stack Developer</div>
+                        </div>
+                        <div class="testimonial-card">
+                            <div class="testimonial-stars">⭐⭐⭐⭐⭐</div>
+                            <p>"Simple, intuitivo y efectivo. Stackr cambió la forma en que colaboro en proyectos."</p>
+                            <div class="testimonial-author">- María Silva, UX Designer</div>
+                        </div>
+						<div class="testimonial-card">
+							<div class="testimonial-stars">⭐⭐⭐⭐⭐</div>
+							<p>"Gracias a Stackr pude sumarme a un proyecto open source que ya está teniendo impacto real. ¡Una experiencia increíble!"</p>
+							<div class="testimonial-author">- Lucas Méndez, Backend Developer</div>
+						</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sección de formularios -->
+        <div class="forms-section">
+            <!-- Formulario de Login -->
+            <div class="auth-form-container active" id="login-form">
+                <div class="form-header">
+                    <h2 class="form-title">Iniciar Sesión</h2>
+                    <p class="form-subtitle">Bienvenido de vuelta</p>
+                </div>
+
+                <form class="auth-form" id="loginForm">
+                    <div class="form-group">
+                        <label for="loginEmail" class="form-label">Email</label>
+                        <input type="email" id="loginEmail" name="email" class="form-input" required>
+                        <div class="form-error" id="loginEmailError"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="loginPassword" class="form-label">Contraseña</label>
+                        <div class="password-input-container">
+                            <input type="password" id="loginPassword" name="password" class="form-input" required>
+                            <button type="button" class="password-toggle" onclick="togglePassword('loginPassword')">
+                                <span class="password-toggle-icon">👁️</span>
+                            </button>
+                        </div>
+                        <div class="form-error" id="loginPasswordError"></div>
+                    </div>
+
+                    <div class="form-options">
+                        <label class="checkbox-container">
+                            <input type="checkbox" id="rememberMe">
+                            <span class="checkmark"></span>
+                            Recordarme
+                        </label>
+                        <a href="#" class="forgot-password">¿Olvidaste tu contraseña?</a>
+                    </div>
+
+                    <button type="submit" class="submit-btn">Iniciar Sesión</button>
+                </form>
+
+                <div class="form-footer">
+                    <p>¿No tienes cuenta? <button class="link-btn" onclick="showRegister()">Regístrate aquí</button></p>
+                </div>
+            </div>
+
+            <!-- Formulario de Registro -->
+            <div class="auth-form-container" id="register-form">
+                <div class="form-header">
+                    <h2 class="form-title">Crear Cuenta</h2>
+                    <p class="form-subtitle">Únete a la comunidad</p>
+                </div>
+
+                <form class="auth-form" id="registerForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="firstName" class="form-label">Nombre</label>
+                            <input type="text" id="firstName" name="firstName" class="form-input" required>
+                            <div class="form-error" id="firstNameError"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="lastName" class="form-label">Apellido</label>
+                            <input type="text" id="lastName" name="lastName" class="form-input" required>
+                            <div class="form-error" id="lastNameError"></div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="registerEmail" class="form-label">Email</label>
+                        <input type="email" id="registerEmail" name="email" class="form-input" required>
+                        <div class="form-error" id="registerEmailError"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="username" class="form-label">Nombre de usuario</label>
+                        <input type="text" id="username" name="username" class="form-input" required>
+                        <div class="form-error" id="usernameError"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="registerPassword" class="form-label">Contraseña</label>
+                        <div class="password-input-container">
+                            <input type="password" id="registerPassword" name="password" class="form-input" required>
+                            <button type="button" class="password-toggle" onclick="togglePassword('registerPassword')">
+                                <span class="password-toggle-icon">👁️</span>
+                            </button>
+                        </div>
+                        <div class="password-strength" id="passwordStrength"></div>
+                        <div class="form-error" id="registerPasswordError"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="confirmPassword" class="form-label">Confirmar contraseña</label>
+                        <div class="password-input-container">
+                            <input type="password" id="confirmPassword" name="confirmPassword" class="form-input" required>
+                            <button type="button" class="password-toggle" onclick="togglePassword('confirmPassword')">
+                                <span class="password-toggle-icon">👁️</span>
+                            </button>
+                        </div>
+                        <div class="form-error" id="confirmPasswordError"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="skills" class="form-label">Habilidades principales (opcional)</label>
+                        <input type="text" id="skills" name="skills" class="form-input" placeholder="Ej: JavaScript, Python, React...">
+                        <small class="form-help">Separa las habilidades con comas</small>
+                    </div>
+
+                    <div class="form-options">
+                        <label class="checkbox-container">
+                            <input type="checkbox" id="acceptTerms" required>
+                            <span class="checkmark"></span>
+                            Acepto los  <a href="#" class="terms-link"> términos y condiciones</a>
+                        </label>
+                    </div>
+
+                    <div class="form-options">
+                        <label class="checkbox-container">
+                            <input type="checkbox" id="newsletter">
+                            <span class="checkmark"></span>
+                            Recibir notificaciones sobre nuevos proyectos
+                        </label>
+                    </div>
+
+                    <button type="submit" class="submit-btn">Crear Cuenta</button>
+                </form>
+
+                <div class="form-footer">
+                    <p>¿Ya tienes cuenta? <button class="link-btn" onclick="showLogin()">Inicia sesión aquí</button></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+        <p>Procesando...</p>
+    </div>
+
+    <!-- Notification system -->
+    <div class="notification" id="notification">
+        <div class="notification-content">
+            <span class="notification-icon"></span>
+            <span class="notification-message"></span>
+        </div>
+        <button class="notification-close" onclick="hideNotification()">×</button>
+    </div>
+
+    <script src="/static/scripts/auth.js"></script>
+    <script>
+        // Theme toggle functionality
+        const toggle = document.getElementById('theme-toggle');
+        
+        // Load saved theme
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark') {
+            toggle.checked = true;
+            document.body.classList.add('dark-mode');
+        }
+
+        toggle.addEventListener('change', () => {
+            document.body.classList.toggle('dark-mode', toggle.checked);
+            localStorage.setItem('theme', toggle.checked ? 'dark' : 'light');
+        });
+    </script>
+</body>
+</html>

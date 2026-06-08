@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/styles/style.css">
+    <title>Stackr — Candidatos</title>
+</head>
+<body class="feed-body">
+    <div class="logo-container">
+        <a href="{{ url_for('feed') }}">
+            <img src="/static/imagenes/logoTomberS.png" alt="Logo TomberS" class="logo-img">
+        </a>
+    </div>
+
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-brand">
+            <img src="/static/imagenes/logoTomberS.png" alt="Stackr" class="sidebar-brand-logo">
+            <div class="sidebar-brand-copy">
+                <strong>Stackr</strong>
+                <span>Panel</span>
+            </div>
+        </div>
+        <div class="menu-icons">
+            <a href="{{ url_for('feed') }}" class="sidebar-link">
+                <span class="menu-icon house"></span>
+                <span class="sidebar-label">Feed</span>
+            </a>
+            <a href="{{ url_for('applications') }}" class="sidebar-link">
+                <span class="menu-icon clipboard"></span>
+                <span class="sidebar-label">Postulaciones</span>
+            </a>
+            <a href="{{ url_for('candidates') }}" class="sidebar-link sidebar-link-active">
+                <span class="menu-icon hamburger"></span>
+                <span class="sidebar-label">Candidatos</span>
+            </a>
+            <a href="{{ url_for('chat') }}" class="sidebar-link">
+                <span class="menu-icon download"></span>
+                <span class="sidebar-label">Chats</span>
+            </a>
+            <a href="{{ url_for('bio') }}" class="sidebar-link">
+                <span class="menu-icon user"></span>
+                <span class="sidebar-label">Perfil</span>
+            </a>
+            <button class="sidebar-link sidebar-link-ghost" type="button">
+                <span class="menu-icon gear"></span>
+                <span class="sidebar-label">Ajustes</span>
+            </button>
+        </div>
+        <div class="sidebar-footer">
+            <div class="sidebar-theme-meta">
+                <span class="menu-icon theme"></span>
+                <span class="sidebar-footer-label">Tema</span>
+            </div>
+            <label class="toggle-switch">
+                <input type="checkbox" id="theme-toggle">
+                <span class="slider"></span>
+            </label>
+        </div>
+    </div>
+    <div class="sidebar-trigger" id="sidebar-trigger"></div>
+
+    <div class="mobile-header" id="mobile-header">
+        <img src="/static/imagenes/logoTomberS.png" alt="Logo TomberS" class="logo-img-mini">
+        <div class="menu-icons">
+            <a href="{{ url_for('feed') }}" class="menu-icon house"></a>
+            <a href="{{ url_for('applications') }}" class="menu-icon clipboard"></a>
+            <div class="menu-icon gear" id="gear-btn-mo"></div>
+            <a href="{{ url_for('bio') }}" class="menu-icon user"></a>
+            <a href="{{ url_for('chat') }}" class="menu-icon download"></a>
+        </div>
+        <label class="toggle-switch">
+            <input type="checkbox" id="theme-togglemo">
+            <span class="slider"></span>
+        </label>
+    </div>
+
+    <div class="swipe-feedback" id="swipe-feedback" aria-hidden="true"></div>
+
+    <!-- Tarjeta de candidato -->
+    <div class="card-container">
+        <div class="project-card" id="candidate-card">
+            <div class="card-title-row">
+                <h2 class="card-title">Cargando...</h2>
+            </div>
+            <div class="user-card-image"></div>
+            <div class="card-stats">
+                <span><span class="fluent--people-team-16-filled iconos"></span><span class="stats-text">—</span></span>
+                <span><span class="tabler--clock iconos"></span><span class="stats-text">—</span></span>
+                <span><span class="material-symbols--translate iconos"></span><span class="stats-text">—</span></span>
+                <span><span class="mdi--tools iconos"></span><span class="stats-text">—</span></span>
+            </div>
+            <div class="card-description"></div>
+            <div class="card-tech"></div>
+            <!-- Etiqueta del proyecto -->
+            <div class="candidate-project-tag" style="
+                margin: 8px 16px 0;
+                padding: 6px 12px;
+                background: rgba(102,126,234,0.2);
+                border-radius: 8px;
+                font-size: 0.8rem;
+                color: #667eea;
+                text-align: center;">
+            </div>
+        </div>
+    </div>
+
+    <div class="status-indicators" id="status-indicators">
+        <div class="dislike-indicator">PASAR</div>
+        <div class="ampliar-indicator">SWIPE UP · VER MAS</div>
+        <div class="like-indicator">MATCH</div>
+    </div>
+
+    <!-- Vista expandida del candidato -->
+    <div class="expanded-card hidden" id="expanded-card">
+        <button class="close-expanded" id="close-expanded">×</button>
+        <div class="expanded-content">
+            <div class="expanded-header">
+                <h2 class="expanded-title">Nombre</h2>
+                <div class="expanded-status">
+                    <span class="status-badge active">Disponible</span>
+                </div>
+            </div>
+            <div class="expanded-main">
+                <div class="expanded-left">
+                    <div class="user-card-image">
+                        <div class="image-overlay"><span class="view-badge">Perfil</span></div>
+                    </div>
+                    <div class="expanded-stats-grid">
+                        <div class="stat-item">
+                            <div class="stat-content"><span class="stat-label">Edad</span><span class="stat-value">—</span></div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-content"><span class="stat-label">Idiomas</span><span class="stat-value">—</span></div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-content"><span class="stat-label">Especialización</span><span class="stat-value">—</span></div>
+                        </div>
+                    </div>
+                    <div class="section">
+                        <h3 class="section-title">Contacto</h3>
+                        <div class="objectives-list" id="contact-list"></div>
+                    </div>
+                </div>
+                <div class="expanded-right">
+                    <div class="section">
+                        <h3 class="section-title">Sobre mí</h3>
+                        <p class="section-content" id="bio-content"></p>
+                    </div>
+                    <div class="section">
+                        <h3 class="section-title">Habilidades</h3>
+                        <div class="tech-grid" id="skills-grid"></div>
+                    </div>
+                    <div class="section">
+                        <h3 class="section-title">Interesado en</h3>
+                        <p class="section-content" id="project-interest"></p>
+                    </div>
+                </div>
+            </div>
+            <div class="expanded-footer">
+                <div class="footer-actions">
+                    <button class="action-btn primary" id="match-btn">¡Hacer Match! 🎉</button>
+                    <button class="action-btn secondary" id="reject-btn">Rechazar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/scripts/candidates.js"></script>
+</body>
+</html>

@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/styles/style.css">
+    
+    <title>Stackr</title>
+</head>
+<body class="feed-body">
+    <div class="logo-container">
+        <img src="/static/imagenes/logoTomberS.png" alt="Logo Tomber Sur" class="logo-img">
+    </div>
+    
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-brand">
+            <img src="/static/imagenes/logoTomberS.png" alt="Stackr" class="sidebar-brand-logo">
+            <div class="sidebar-brand-copy">
+                <strong>Stackr</strong>
+                <span>Panel</span>
+            </div>
+        </div>
+        <div class="menu-icons">
+            <a href="{{ url_for('feed') }}" class="sidebar-link sidebar-link-active">
+                <span class="menu-icon house"></span>
+                <span class="sidebar-label">Feed</span>
+            </a>
+            <a href="{{ url_for('applications') }}" class="sidebar-link">
+                <span class="menu-icon clipboard"></span>
+                <span class="sidebar-label">Postulaciones</span>
+            </a>
+            <a href="{{ url_for('candidates') }}" class="sidebar-link">
+                <span class="menu-icon hamburger"></span>
+                <span class="sidebar-label">Candidatos</span>
+            </a>
+            <a href="{{ url_for('chat') }}" class="sidebar-link">
+                <span class="menu-icon download"></span>
+                <span class="sidebar-label">Chats</span>
+            </a>
+            <a href="{{ url_for('bio') }}" class="sidebar-link">
+                <span class="menu-icon user"></span>
+                <span class="sidebar-label">Perfil</span>
+            </a>
+            <button class="sidebar-link sidebar-link-ghost" type="button">
+                <span class="menu-icon gear"></span>
+                <span class="sidebar-label">Ajustes</span>
+            </button>
+        </div>
+        <div class="sidebar-footer">
+            <div class="sidebar-theme-meta">
+                <span class="menu-icon theme"></span>
+                <span class="sidebar-footer-label">Tema</span>
+            </div>
+            <label class="toggle-switch">
+                <input type="checkbox" id="theme-toggle">
+                <span class="slider"></span>
+            </label>
+        </div>
+    </div>
+    <div class="sidebar-trigger" id="sidebar-trigger"></div>
+
+    <div class="mobile-header" id="mobile-header">
+        <img src="/static/imagenes/logoTomberS.png" alt="Logo Tomber Sur" class="logo-img-mini">        
+        <div class="menu-icons">
+            <a href="{{ url_for('feed') }}" class="menu-icon house"></a>
+            <a href="{{ url_for('applications') }}" class="menu-icon clipboard"></a>
+            <div class="menu-icon gear"></div>
+            <a href="{{ url_for('bio') }}" class="menu-icon user"></a>
+            <a href="{{ url_for('chat') }}" class="menu-icon download"></a>
+        </div>
+        <label class="toggle-switch">
+            <input type="checkbox" id="theme-togglemo">
+            <span class="slider"></span>
+        </label>
+    </div>
+
+    <div class="swipe-feedback" id="swipe-feedback" aria-hidden="true"></div>
+
+    <div class="tutorial-overlay" id="tutorial-overlay" aria-hidden="true">
+        <div class="tutorial-panel" role="dialog" aria-modal="true" aria-labelledby="tutorial-title">
+            <button class="tutorial-close" id="tutorial-close" type="button" aria-label="Cerrar tutorial">×</button>
+            <div class="tutorial-header">
+                <p class="tutorial-kicker">Como funciona</p>
+                <h2 class="tutorial-title" id="tutorial-title">Desliza para decidir</h2>
+                <p class="tutorial-description">
+                    Izquierda para pasar, derecha para hacer match y arriba para ver el detalle.
+                </p>
+            </div>
+            <div class="tutorial-showcase">
+                <div class="tutorial-demo">
+                    <div class="tutorial-demo-stage" id="tutorial-demo-stage" data-state="idle">
+                        <div class="tutorial-demo-label tutorial-demo-label-up">&#8593; Ver mas</div>
+                        <div class="tutorial-demo-label tutorial-demo-label-left">&#8592; Pasar</div>
+                        <div class="tutorial-demo-label tutorial-demo-label-right">&#8594; Match</div>
+                        <div class="tutorial-demo-card" id="tutorial-demo-card">
+                            <div class="tutorial-demo-image">
+                                <span class="tutorial-demo-chip">Proyecto de prueba</span>
+                            </div>
+                            <div class="tutorial-demo-content">
+                                <div class="tutorial-demo-header">
+                                    <h3>Travel Buddy</h3>
+                                    <span>3/6</span>
+                                </div>
+                                <p>Buscamos frontend y UX para lanzar una app de viajes entre amigos.</p>
+                                <div class="tutorial-demo-stack">
+                                    <span>React</span>
+                                    <span>Node</span>
+                                    <span>UI</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="tutorial-steps">
+                    <div class="tutorial-step tutorial-step-left">
+                        <span class="tutorial-step-badge">&#8592; Swipe left</span>
+                        <div class="tutorial-step-copy">
+                            <h3>Pasar</h3>
+                            <p>Sigue con el siguiente proyecto.</p>
+                        </div>
+                    </div>
+                    <div class="tutorial-step tutorial-step-right">
+                        <span class="tutorial-step-badge">&#8594; Swipe right</span>
+                        <div class="tutorial-step-copy">
+                            <h3>Match</h3>
+                            <p>Te sumas al proyecto.</p>
+                        </div>
+                    </div>
+                    <div class="tutorial-step tutorial-step-up">
+                        <span class="tutorial-step-badge">&#8593; Swipe up</span>
+                        <div class="tutorial-step-copy">
+                            <h3>Ver mas</h3>
+                            <p>Abre la ficha completa.</p>
+                        </div>
+                    </div>
+                </div>
+                <p class="tutorial-demo-caption" id="tutorial-demo-caption">
+                    Desliza la card para probar los tres gestos.
+                </p>
+            </div>
+            <div class="tutorial-actions">
+                <button class="tutorial-btn tutorial-btn-secondary" id="tutorial-skip" type="button">Cerrar</button>
+                <button class="tutorial-btn tutorial-btn-primary" id="tutorial-start" type="button">Entendido</button>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="card-container">
+        <div class="project-card" id="project-card">
+            <div class="card-title-row">
+                <h2 class="card-title">Nombre proyecto</h2>
+            </div>
+            <div class="card-image"></div>
+            <div class="card-stats">
+                <span><span class="fluent--people-team-16-filled iconos"></span><span class="stats-text">07/23</span></span>
+                <span><span class="tabler--clock iconos"></span><span class="stats-text">Indefinido</span></span>
+                <span><span class="material-symbols--translate iconos"></span><span class="stats-text">Español</span></span>
+                <span><span class="mdi--tools iconos"></span><span class="stats-text">Full Stack</span></span>
+            </div>
+            <div class="card-description">
+                Lorem ipsum dolor sit amet consectetur adipiscing elit. Aliquam egestas dictum class. Cras libero nulla placerat nec nisi dui tempus at, bibendum volutpat sodales. Cras posuere feugiat metus facilisis sollicitudin purus, nulla ante congue mollis non sem eget, in facilisi faucerat sit et accumsan consequat.
+            </div>
+            <div class="card-tech">
+                <div class="tech-icon">Py</div>
+                <div class="tech-icon">Html</div>
+                <div class="tech-icon">Css</div>
+                <div class="tech-icon">Js</div>
+            </div>
+            <div class="actions">
+                <svg class="rotate-icon" viewBox="0 0 24 24">
+                    <path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z" fill="currentColor"/>
+                </svg>
+            </div>
+        </div>
+    </div>
+
+    <div class="status-indicators" id="status-indicators">
+        <div class="dislike-indicator">PASAR</div>
+        <div class="ampliar-indicator">SWIPE UP · VER MAS</div>
+        <div class="like-indicator">MATCH</div>
+    </div>
+
+    <div class="create-project-container" style="display:flex; gap:10px; flex-wrap:wrap; justify-content:center;">
+        <a href="/candidates" class="create-project-btn" id="candidates-btn" style="text-decoration:none; display:none;">
+            <span class="create-icon">👥</span>
+            Candidatos
+        </a>
+        <a href="/chat" class="create-project-btn" style="text-decoration:none; background: linear-gradient(135deg, #4a2c50, #764ba2);">
+            <span class="create-icon">💬</span>
+            Mis chats
+        </a>
+        <button class="create-project-btn" id="create-project-btn">
+            <span class="create-icon">+</span>
+            Crear proyecto
+        </button>
+    </div>
+
+    <div class="expanded-card hidden" id="expanded-card">
+        <button class="close-expanded" id="close-expanded">×</button>
+        <div class="expanded-content">
+            <div class="expanded-header">
+                <h2 class="expanded-title">Sistema de Gestión Empresarial</h2>
+                <div class="expanded-status">
+                    <span class="status-badge active">Activo</span>
+                </div>
+            </div>
+
+            <div class="expanded-main">
+                <div class="expanded-left">
+                    <div class="expanded-image">
+                        <img src="/static/imagenes/coding-foto-ejemplo.jpg" alt="Preview del proyecto">
+                        <div class="image-overlay">
+                            <span class="view-badge">Vista previa</span>
+                        </div>
+                    </div>
+                    
+                    <div class="expanded-stats-grid">
+                        <div class="stat-item">
+                            <span class="fluent--people-team-16-filled"></span>
+                            <div class="stat-content">
+                                <span class="stat-label">Equipo</span>
+                                <span class="stat-value">07/23 miembros</span>
+                            </div>
+                        </div>
+                        <div class="stat-item">
+                            <span class="tabler--clock"></span>
+                            <div class="stat-content">
+                                <span class="stat-label">Duración</span>
+                                <span class="stat-value">Indefinido</span>
+                            </div>
+                        </div>
+                        <div class="stat-item">
+                            <span class="material-symbols--translate"></span>
+                            <div class="stat-content">
+                                <span class="stat-label">Idioma</span>
+                                <span class="stat-value">Español</span>
+                            </div>
+                        </div>
+                        <div class="stat-item">
+                            <span class="mdi--tools"></span>
+                            <div class="stat-content">
+                                <span class="stat-label">Tipo</span>
+                                <span class="stat-value">Full Stack</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <h3 class="section-title">Objetivos del Proyecto</h3>
+                        <div class="objectives-list">
+                            <div class="objective-item">
+                                <div class="objective-icon">✓</div>
+                                <span>Desarrollar interfaz de usuario intuitiva y responsive</span>
+                            </div>
+                            <div class="objective-item">
+                                <div class="objective-icon">✓</div>
+                                <span>Implementar sistema de autenticación seguro</span>
+                            </div>
+                            <div class="objective-item">
+                                <div class="objective-icon">⏳</div>
+                                <span>Crear módulos de gestión empresarial</span>
+                            </div>
+                            <div class="objective-item">
+                                <div class="objective-icon">📋</div>
+                                <span>Integrar sistema de reportes avanzados</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="expanded-right">
+                    <div class="section">
+                        <h3 class="section-title">Descripción del Proyecto</h3>
+                        <p class="section-content">
+                            Este proyecto consiste en el desarrollo de un sistema integral de gestión empresarial que permitirá a las empresas optimizar sus procesos internos, gestionar recursos humanos, controlar inventarios y generar reportes detallados. La aplicación incluirá módulos para contabilidad, ventas, compras y administración general.
+                        </p>
+                    </div>
+
+                    <div class="section">
+                        <h3 class="section-title">Tecnologías Utilizadas</h3>
+                        <div class="tech-grid">
+                            <div class="tech-item">
+                                <span class="tech-icon-expanded">Py</span>
+                                <span class="tech-name">Python</span>
+                            </div>
+                            <div class="tech-item">
+                                <span class="tech-icon-expanded">Html</span>
+                                <span class="tech-name">HTML5</span>
+                            </div>
+                            <div class="tech-item">
+                                <span class="tech-icon-expanded">Css</span>
+                                <span class="tech-name">CSS3</span>
+                            </div>
+                            <div class="tech-item">
+                                <span class="tech-icon-expanded">Js</span>
+                                <span class="tech-name">JavaScript</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <h3 class="section-title">Aptitudes Buscadas</h3>
+                        <div class="skills-grid">
+                            <div class="skill-badge">Desarrollo Backend</div>
+                            <div class="skill-badge">Diseño UI/UX</div>
+                            <div class="skill-badge">Base de Datos</div>
+                            <div class="skill-badge">API REST</div>
+                            <div class="skill-badge">Testing</div>
+                            <div class="skill-badge">DevOps</div>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <h3 class="section-title">Progreso del Proyecto</h3>
+                        <div class="progress-container">
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 65%"></div>
+                            </div>
+                            <span class="progress-text">65% Completado</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="expanded-footer">
+                <div class="footer-actions">
+                    <button class="action-btn primary">Unirse al Proyecto</button>
+                    <button class="action-btn secondary">Ver Repositorio</button>
+                    <button class="action-btn tertiary">Contactar Equipo</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="create-project-card hidden" id="create-project-card">
+    <div class="create-content">
+        <div class="create-header">
+            <h2 class="create-title">Crear Nuevo Proyecto</h2>
+        </div>
+
+        <form class="create-form" id="create-form">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="project-name">Nombre del Proyecto *</label>
+                    <input type="text" id="project-name" required>
+                </div>
+                <div class="form-group">
+                    <label for="project-status">Estado</label>
+                    <select id="project-status">
+                        <option value="activo">Activo</option>
+                        <option value="planificacion">En Planificación</option>
+                        <option value="desarrollo">En Desarrollo</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="team-size">Tamaño del Equipo</label>
+                    <input type="text" id="team-size" placeholder="ej: 5/10">
+                </div>
+                <div class="form-group">
+                    <label for="duration">Duración</label>
+                    <input type="text" id="duration" placeholder="ej: 3 meses">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="language">Idioma</label>
+                    <select id="language">
+                        <option value="español">Español</option>
+                        <option value="ingles">Inglés</option>
+                        <option value="portugues">Portugués</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="project-type">Tipo de Proyecto</label>
+                    <select id="project-type">
+                        <option value="full-stack">Full Stack</option>
+                        <option value="frontend">Frontend</option>
+                        <option value="backend">Backend</option>
+                        <option value="mobile">Mobile</option>
+                        <option value="data-science">Data Science</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="description">Descripción del Proyecto *</label>
+                <textarea id="description" rows="4" required placeholder="Describe tu proyecto en detalle..."></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="project-image">Imagen del Proyecto</label>
+                <div class="image-upload-container">
+                    <input type="file" id="project-image" accept="image/*" class="image-input">
+                    <div class="image-preview" id="image-preview">
+                        <div class="image-placeholder">
+                            <span class="upload-icon">📁</span>
+                            <span class="upload-text">Seleccionar imagen</span>
+                        </div>
+                        <img id="preview-img" class="preview-image" style="display: none;">
+                        <button type="button" class="remove-image" id="remove-image" style="display: none;">×</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="technologies">Tecnologías (separadas por comas)</label>
+                <input type="text" id="technologies" placeholder="Python, React, Node.js, MongoDB">
+            </div>
+
+            <div class="form-group">
+                <label for="skills">Aptitudes Buscadas (separadas por comas)</label>
+                <input type="text" id="skills" placeholder="Desarrollo Backend, UI/UX, Testing">
+            </div>
+
+            <div class="form-actions">
+                <button type="button" class="action-btn secondary" id="cancel-create">Cancelar</button>
+                <button type="submit" class="action-btn primary">Crear Proyecto</button>
+            </div>
+        </form>
+    </div>
+    </div>
+
+    <script src="/static/scripts/script.js"></script>
+    <script src="/static/scripts/projects.js"></script>
+</body>
+</html>

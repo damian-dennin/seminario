@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/styles/style.css">
+    <title>Stackr — Mis postulaciones</title>
+    <style>
+        body.applications-page {
+            justify-content: flex-start;
+            align-items: center;
+            padding: 110px 120px 40px;
+        }
+
+        .applications-layout {
+            width: min(100%, 1140px);
+            margin: 0 auto;
+            display: grid;
+            gap: 22px;
+        }
+
+        .applications-hero {
+            display: grid;
+            gap: 10px;
+            color: #fff;
+        }
+
+        .applications-kicker {
+            font-size: 12px;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .applications-title {
+            font-size: clamp(30px, 4vw, 46px);
+            line-height: 1.05;
+            margin: 0;
+        }
+
+        .applications-description {
+            margin: 0;
+            font-size: 15px;
+            line-height: 1.6;
+            color: rgba(244, 232, 255, 0.8);
+            max-width: 620px;
+        }
+
+        .applications-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 18px;
+        }
+
+        .application-card {
+            display: grid;
+            gap: 16px;
+            padding: 22px;
+            border-radius: 24px;
+            background: linear-gradient(180deg, rgba(104, 62, 112, 0.98) 0%, rgba(84, 44, 92, 0.98) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            box-shadow: 0 22px 44px rgba(36, 5, 53, 0.18);
+            color: #f5eefe;
+        }
+
+        .application-card-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 14px;
+        }
+
+        .application-card-title {
+            margin: 0;
+            font-size: 24px;
+            line-height: 1.1;
+        }
+
+        .application-status {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 102px;
+            padding: 8px 12px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            flex-shrink: 0;
+        }
+
+        .application-status.pending {
+            background: rgba(255, 211, 122, 0.16);
+            color: #ffe39a;
+        }
+
+        .application-status.matched {
+            background: rgba(124, 227, 185, 0.16);
+            color: #d7ffee;
+        }
+
+        .application-status.rejected {
+            background: rgba(255, 99, 110, 0.16);
+            color: #ffd4d8;
+        }
+
+        .application-description {
+            margin: 0;
+            font-size: 14px;
+            line-height: 1.6;
+            color: rgba(244, 232, 255, 0.82);
+        }
+
+        .application-meta {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .application-meta-item {
+            display: grid;
+            gap: 4px;
+            padding: 12px 14px;
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .application-meta-label {
+            font-size: 11px;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: rgba(244, 232, 255, 0.58);
+        }
+
+        .application-meta-value {
+            font-size: 14px;
+            font-weight: 600;
+            color: #fff;
+            overflow-wrap: anywhere;
+        }
+
+        .application-actions {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .application-chat-link {
+            width: 46px;
+            height: 46px;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            background: rgba(255, 255, 255, 0.08);
+            color: #fff;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease, opacity 0.2s ease;
+        }
+
+        .application-chat-link:hover {
+            transform: translateY(-1px);
+            background: rgba(194, 123, 255, 0.24);
+            border-color: rgba(194, 123, 255, 0.3);
+        }
+
+        .application-chat-link.disabled {
+            opacity: 0.42;
+            cursor: not-allowed;
+        }
+
+        .application-chat-link .menu-icon {
+            width: 20px;
+            height: 20px;
+        }
+
+        .applications-empty {
+            padding: 42px 24px;
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            background: rgba(255, 255, 255, 0.06);
+            text-align: center;
+            color: rgba(244, 232, 255, 0.82);
+        }
+
+        @media (max-width: 768px) {
+            body.applications-page {
+                padding: 74px 0 24px;
+            }
+
+            .applications-layout {
+                width: 94%;
+                gap: 16px;
+            }
+
+            .applications-grid {
+                grid-template-columns: 1fr;
+                gap: 14px;
+            }
+
+            .application-card {
+                padding: 18px;
+            }
+
+            .application-meta {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body class="feed-body applications-page">
+    <div class="logo-container">
+        <a href="{{ url_for('feed') }}">
+            <img src="/static/imagenes/logoTomberS.png" alt="Logo TomberS" class="logo-img">
+        </a>
+    </div>
+
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-brand">
+            <img src="/static/imagenes/logoTomberS.png" alt="Stackr" class="sidebar-brand-logo">
+            <div class="sidebar-brand-copy">
+                <strong>Stackr</strong>
+                <span>Panel</span>
+            </div>
+        </div>
+        <div class="menu-icons">
+            <a href="{{ url_for('feed') }}" class="sidebar-link">
+                <span class="menu-icon house"></span>
+                <span class="sidebar-label">Feed</span>
+            </a>
+            <a href="{{ url_for('applications') }}" class="sidebar-link sidebar-link-active">
+                <span class="menu-icon clipboard"></span>
+                <span class="sidebar-label">Postulaciones</span>
+            </a>
+            <a href="{{ url_for('candidates') }}" class="sidebar-link">
+                <span class="menu-icon hamburger"></span>
+                <span class="sidebar-label">Candidatos</span>
+            </a>
+            <a href="{{ url_for('chat') }}" class="sidebar-link">
+                <span class="menu-icon download"></span>
+                <span class="sidebar-label">Chats</span>
+            </a>
+            <a href="{{ url_for('bio') }}" class="sidebar-link">
+                <span class="menu-icon user"></span>
+                <span class="sidebar-label">Perfil</span>
+            </a>
+            <button class="sidebar-link sidebar-link-ghost" type="button">
+                <span class="menu-icon gear"></span>
+                <span class="sidebar-label">Ajustes</span>
+            </button>
+        </div>
+        <div class="sidebar-footer">
+            <div class="sidebar-theme-meta">
+                <span class="menu-icon theme"></span>
+                <span class="sidebar-footer-label">Tema</span>
+            </div>
+            <label class="toggle-switch">
+                <input type="checkbox" id="theme-toggle">
+                <span class="slider"></span>
+            </label>
+        </div>
+    </div>
+    <div class="sidebar-trigger" id="sidebar-trigger"></div>
+
+    <div class="mobile-header" id="mobile-header">
+        <img src="/static/imagenes/logoTomberS.png" alt="Logo TomberS" class="logo-img-mini">
+        <div class="menu-icons">
+            <a href="{{ url_for('feed') }}" class="menu-icon house"></a>
+            <a href="{{ url_for('applications') }}" class="menu-icon clipboard"></a>
+            <div class="menu-icon gear"></div>
+            <a href="{{ url_for('bio') }}" class="menu-icon user"></a>
+            <a href="{{ url_for('chat') }}" class="menu-icon download"></a>
+        </div>
+        <label class="toggle-switch">
+            <input type="checkbox" id="theme-togglemo">
+            <span class="slider"></span>
+        </label>
+    </div>
+
+    <main class="applications-layout">
+        <section class="applications-hero">
+            <span class="applications-kicker">Seguimiento</span>
+            <h1 class="applications-title">Mis postulaciones</h1>
+            <p class="applications-description">
+                Revisa los proyectos a los que ya mostraste interés y entra al chat cuando el match ya esté activo.
+            </p>
+        </section>
+
+        <section class="applications-grid" id="applications-grid">
+            <div class="applications-empty">Cargando postulaciones...</div>
+        </section>
+    </main>
+
+    <script src="/static/scripts/applications.js"></script>
+</body>
+</html>
