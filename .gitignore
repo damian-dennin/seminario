@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+*.pyo
+*.log
+users_database.json
+projects_database.json
+.env
+*.sqlite

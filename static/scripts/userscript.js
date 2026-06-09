@@ -65,16 +65,30 @@ function populateUserInterface() {
         cardTitle.textContent = `${userData.firstName} ${userData.lastName}`;
     }
 
-    // Avatar con iniciales en todas las imágenes de perfil
+    // Foto de perfil o avatar con iniciales
     const initials = ((userData.firstName?.[0] || '') + (userData.lastName?.[0] || '')).toUpperCase();
     document.querySelectorAll('.user-card-image').forEach(av => {
-        if (!av.querySelector('.avatar-initials')) {
-            const span = document.createElement('span');
-            span.className = 'avatar-initials';
-            span.textContent = initials;
-            av.appendChild(span);
+        if (userData.photo_url) {
+            // Si hay foto guardada, mostrarla
+            av.style.backgroundImage = `url('${userData.photo_url}')`;
+            av.style.backgroundSize = 'cover';
+            av.style.backgroundPosition = 'center';
+            // Ocultar iniciales si existen
+            const existing = av.querySelector('.avatar-initials');
+            if (existing) existing.style.display = 'none';
         } else {
-            av.querySelector('.avatar-initials').textContent = initials;
+            // Si no hay foto, mostrar iniciales
+            av.style.backgroundImage = '';
+            if (!av.querySelector('.avatar-initials')) {
+                const span = document.createElement('span');
+                span.className = 'avatar-initials';
+                span.textContent = initials;
+                av.appendChild(span);
+            } else {
+                const initSpan = av.querySelector('.avatar-initials');
+                initSpan.textContent = initials;
+                initSpan.style.display = '';
+            }
         }
     });
 
@@ -402,23 +416,47 @@ function collectUserData() {
 }
 
 
+// Sube una imagen al servidor y retorna la URL pública, o null si falla
+async function uploadProfileImage(file) {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('type', 'profile');
+    try {
+        const r = await fetch('/api/upload', { method: 'POST', body: formData });
+        const data = await r.json();
+        if (r.ok) return data.url;
+        showErrorMessage(data.error || 'Error subiendo la imagen');
+        return null;
+    } catch {
+        showErrorMessage('Error de conexión al subir la imagen');
+        return null;
+    }
+}
+
 // Función para guardar cambios en la base de datos
 async function saveChangesToDatabase() {
     try {
         const updatedData = collectUserData();
-        
+
+        // Si el usuario seleccionó una imagen nueva, subirla primero
+        if (selectedProfileImage) {
+            showSuccessMessage('Subiendo imagen...');
+            const url = await uploadProfileImage(selectedProfileImage);
+            if (url) {
+                updatedData.photo_url = url;
+                selectedProfileImage = null;  // limpiar para no re-subir
+            }
+        }
+
         const response = await fetch('/api/user/profile', {
             method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(updatedData)
         });
 
         if (response.ok) {
             const result = await response.json();
             userData = result;
-            // Actualizar la tarjeta inmediatamente sin recargar
             populateUserInterface();
             showSuccessMessage('Perfil actualizado exitosamente');
         } else {

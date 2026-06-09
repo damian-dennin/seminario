@@ -24,6 +24,8 @@ CREATE TABLE IF NOT EXISTS users (
   status          TEXT DEFAULT 'Disponible',
   certifications  JSONB DEFAULT '[]',
   interests       JSONB DEFAULT '[]',
+  objectives      JSONB DEFAULT '[]',
+  photo_url       TEXT DEFAULT '',
   created_at      TIMESTAMPTZ DEFAULT NOW(),
   updated_at      TIMESTAMPTZ DEFAULT NOW()
 );

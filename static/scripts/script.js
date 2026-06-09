@@ -223,8 +223,29 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // Sube imagen de proyecto y retorna la URL pública, o '' si no hay imagen
+    async function uploadProjectImage(file) {
+        if (!file) return '';
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('type', 'project');
+        try {
+            const r = await fetch('/api/upload', { method: 'POST', body: formData });
+            const data = await r.json();
+            if (r.ok) return data.url;
+            console.error('Error subiendo imagen del proyecto:', data.error);
+            return '';
+        } catch {
+            console.error('Error de conexión al subir imagen del proyecto');
+            return '';
+        }
+    }
+
     createForm?.addEventListener('submit', async (e) => {
         e.preventDefault();
+
+        const submitBtn = createForm.querySelector('button[type="submit"]');
+        if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Creando...'; }
 
         const teamSizeRaw = document.getElementById('team-size').value;
         const teamParts = teamSizeRaw.split('/').map((value) => parseInt(value.trim(), 10) || 0);
@@ -244,11 +265,14 @@ document.addEventListener('DOMContentLoaded', () => {
             .map((skill) => skill.trim())
             .filter(Boolean);
 
+        // Subir imagen si el usuario seleccionó una
+        const imageUrl = await uploadProjectImage(selectedImageFile);
+
         const projectData = {
             title: document.getElementById('project-name').value,
             status: document.getElementById('project-status').value,
             description: document.getElementById('description').value,
-            image_url: '',
+            image_url: imageUrl,
             stats: {
                 team_current: teamCurrent,
                 team_max: teamMax,
@@ -274,8 +298,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (window.projectsManager) {
                     window.projectsManager.projects.push(newProject);
                 }
+                selectedImageFile = null;
                 closeCreateModal();
-                alert('¡Proyecto creado exitosamente!');
+                showMatchToast('¡Proyecto creado exitosamente! 🚀');
                 return;
             }
 
@@ -284,6 +309,8 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) {
             console.error('Error al crear proyecto:', error);
             alert('Error de conexión al crear el proyecto');
+        } finally {
+            if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Crear Proyecto'; }
         }
     });
 
@@ -734,6 +761,67 @@ document.addEventListener('DOMContentLoaded', () => {
 
     window.handleSwipe = handleSwipe;
     window.setupSwipeHandlers = setupSwipeHandlers;
+
+    // ── Notificaciones de match en tiempo real ────────────────
+    async function initMatchNotifications() {
+        if (!window.supabase?.createClient) return;
+        try {
+            const configRes = await fetch('/api/config');
+            if (!configRes.ok) return;
+            const config = await configRes.json();
+            const sb = window.supabase.createClient(config.supabaseUrl, config.supabaseKey);
+            const userId = config.currentUserId;
+
+            sb.channel('match-notifications')
+                .on(
+                    'postgres_changes',
+                    { event: 'INSERT', schema: 'public', table: 'matches' },
+                    (payload) => {
+                        const match = payload.new;
+                        // Solo notificar si el match involucra al usuario actual
+                        if (match.user_id !== userId && match.owner_id !== userId) return;
+
+                        showMatchNotification();
+                    }
+                )
+                .subscribe();
+        } catch (e) {
+            console.warn('No se pudieron iniciar las notificaciones de match:', e);
+        }
+    }
+
+    function showMatchNotification() {
+        // Badge en el link de Chats del sidebar
+        const chatLinks = document.querySelectorAll('a[href*="chat"]');
+        chatLinks.forEach(link => {
+            if (!link.querySelector('.notif-badge')) {
+                const badge = document.createElement('span');
+                badge.className = 'notif-badge';
+                badge.textContent = '●';
+                badge.style.cssText = `
+                    color: #4CDB8B; font-size: 0.6rem;
+                    margin-left: 4px; animation: pulse 1.5s infinite;
+                `;
+                link.appendChild(badge);
+            }
+        });
+
+        // Toast de notificación
+        const toast = document.createElement('div');
+        toast.innerHTML = '🎉 ¡Nuevo match! <a href="/chat" style="color:white;text-decoration:underline;">Ver chat</a>';
+        toast.style.cssText = `
+            position:fixed; bottom:30px; left:50%; transform:translateX(-50%);
+            background:linear-gradient(135deg,#4CDB8B,#2ecc71);
+            color:white; padding:14px 28px; border-radius:24px;
+            font-size:0.95rem; z-index:9999; cursor:pointer;
+            box-shadow:0 4px 20px rgba(0,0,0,0.3);
+        `;
+        document.body.appendChild(toast);
+        toast.addEventListener('click', () => { window.location.href = '/chat'; });
+        setTimeout(() => toast.remove(), 6000);
+    }
+
+    initMatchNotifications();
 
     const settingsPanel = document.createElement('div');
     settingsPanel.id = 'settings-panel';

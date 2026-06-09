@@ -2,13 +2,21 @@ from flask import Flask, render_template, jsonify, request, redirect, url_for, s
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 import requests as http
+import os
+import uuid
+from dotenv import load_dotenv
+
+load_dotenv()  # carga variables desde .env si existe
 
 app = Flask(__name__)
-app.secret_key = 'stackr-dev-secret-2024'
+app.secret_key = os.environ.get('SECRET_KEY', 'dev-secret-local-only')
 
-# --- Conexión a Supabase via REST API (compatible con Python 3.14) ---
-SUPABASE_URL = "https://hareuuvxfrepfwirhrkw.supabase.co/rest/v1"
-SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhhcmV1dXZ4ZnJlcGZ3aXJocmt3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA0MjEzMjksImV4cCI6MjA5NTk5NzMyOX0.Aplt58VKlVyeA6zFGS_4_rl8668LTxHFcZOKVrbGoOs"
+# --- Conexión a Supabase via REST API ---
+SUPABASE_URL     = os.environ.get('SUPABASE_URL', '')          # ej: https://xxx.supabase.co/rest/v1
+SUPABASE_KEY     = os.environ.get('SUPABASE_KEY', '')
+SUPABASE_PROJECT = SUPABASE_URL.replace('/rest/v1', '')        # ej: https://xxx.supabase.co
+SUPABASE_STORAGE = f"{SUPABASE_PROJECT}/storage/v1"
+SUPABASE_BUCKET  = 'images'
 
 HEADERS = {
     "apikey":        SUPABASE_KEY,
@@ -185,7 +193,8 @@ def update_user_profile():
         allowed_fields = [
             'firstName', 'lastName', 'age', 'birthDate', 'languages',
             'specialization', 'phone', 'linkedin', 'github', 'portfolio',
-            'bio', 'skills', 'certifications', 'interests', 'status'
+            'bio', 'skills', 'certifications', 'interests', 'status',
+            'objectives', 'photo_url'
         ]
         update_data = {}
         for field in allowed_fields:
@@ -257,7 +266,12 @@ def create_project():
     if 'user_id' not in session:
         return jsonify({'error': 'No autorizado'}), 401
 
-    new_project = request.json
+    new_project = request.get_json()
+    if not new_project:
+        return jsonify({'error': 'Body JSON requerido'}), 400
+    if not new_project.get('title'):
+        return jsonify({'error': 'El título del proyecto es requerido'}), 400
+    new_project = dict(new_project)  # copia para no mutar el original
     new_project.pop('id', None)
     new_project['creator_id'] = session['user_id']
     new_project['created_at'] = datetime.now().strftime('%Y-%m-%d')
@@ -279,7 +293,10 @@ def update_project(project_id):
     if existing[0].get('creator_id') and existing[0]['creator_id'] != session['user_id']:
         return jsonify({'error': 'No tenés permiso para editar este proyecto'}), 403
 
-    updated_data = request.json
+    updated_data = request.get_json()
+    if not updated_data:
+        return jsonify({'error': 'Body JSON requerido'}), 400
+    updated_data = dict(updated_data)
     updated_data.pop('id', None)
     updated_data['updated_at'] = datetime.now().strftime('%Y-%m-%d')
 
@@ -598,7 +615,8 @@ def send_message(match_id):
     if match['user_id'] != session['user_id'] and match['owner_id'] != session['user_id']:
         return jsonify({'error': 'No tenés permiso'}), 403
 
-    content = request.json.get('content', '').strip()
+    body = request.get_json() or {}
+    content = body.get('content', '').strip()
     if not content:
         return jsonify({'error': 'El mensaje no puede estar vacío'}), 400
 
@@ -608,6 +626,76 @@ def send_message(match_id):
         'content':   content
     })
     return jsonify(message), 201
+
+
+# ============================================================
+# UPLOAD DE IMÁGENES A SUPABASE STORAGE
+# ============================================================
+
+ALLOWED_MIME_TYPES = {'image/jpeg', 'image/png', 'image/gif', 'image/webp'}
+MAX_FILE_SIZE = 5 * 1024 * 1024  # 5 MB
+
+@app.route('/api/upload', methods=['POST'])
+def upload_image():
+    if 'user_id' not in session:
+        return jsonify({'error': 'No autorizado'}), 401
+
+    if 'file' not in request.files:
+        return jsonify({'error': 'No se envió ningún archivo'}), 400
+
+    file = request.files['file']
+    if not file or file.filename == '':
+        return jsonify({'error': 'Archivo inválido'}), 400
+
+    if file.content_type not in ALLOWED_MIME_TYPES:
+        return jsonify({'error': 'Solo se permiten imágenes JPG, PNG, GIF o WebP'}), 400
+
+    file_bytes = file.read()
+    if len(file_bytes) > MAX_FILE_SIZE:
+        return jsonify({'error': 'El archivo supera el límite de 5 MB'}), 400
+
+    # Carpeta según el tipo: 'profile' o 'project'
+    folder = request.form.get('type', 'profile')
+    if folder not in ('profile', 'project'):
+        folder = 'profile'
+
+    ext = file.filename.rsplit('.', 1)[-1].lower() if '.' in file.filename else 'jpg'
+    filename = f"{folder}/{session['user_id']}_{uuid.uuid4().hex}.{ext}"
+
+    storage_headers = {
+        'apikey':        SUPABASE_KEY,
+        'Authorization': f'Bearer {SUPABASE_KEY}',
+        'Content-Type':  file.content_type,
+        'x-upsert':      'true',   # sobreescribe si ya existe el mismo path
+    }
+
+    r = http.post(
+        f"{SUPABASE_STORAGE}/object/{SUPABASE_BUCKET}/{filename}",
+        headers=storage_headers,
+        data=file_bytes
+    )
+
+    if r.status_code not in (200, 201):
+        return jsonify({'error': 'Error subiendo imagen', 'detail': r.text}), 500
+
+    public_url = f"{SUPABASE_PROJECT}/storage/v1/object/public/{SUPABASE_BUCKET}/{filename}"
+    return jsonify({'url': public_url}), 201
+
+
+# ============================================================
+# CONFIGURACIÓN PÚBLICA PARA EL FRONTEND (Supabase Realtime)
+# ============================================================
+
+@app.route('/api/config')
+def get_config():
+    """Retorna la config pública de Supabase para el cliente JS (solo usuarios autenticados)."""
+    if 'user_id' not in session:
+        return jsonify({'error': 'No autorizado'}), 401
+    return jsonify({
+        'supabaseUrl':  SUPABASE_PROJECT,
+        'supabaseKey':  SUPABASE_KEY,
+        'currentUserId': session['user_id']
+    })
 
 
 if __name__ == '__main__':

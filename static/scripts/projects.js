@@ -237,12 +237,15 @@ class ProjectsManager {
     }
 
     updateStats(stats) {
+        const s = stats || {};
         const statsElements = document.querySelectorAll('.stats-text');
         if (statsElements.length >= 4) {
-            statsElements[0].textContent = `${stats.team_current}/${stats.team_max}`;
-            statsElements[1].textContent = stats.duration;
-            statsElements[2].textContent = stats.language;
-            statsElements[3].textContent = stats.type;
+            const current = s.team_current ?? '-';
+            const max = s.team_max ?? '-';
+            statsElements[0].textContent = `${current}/${max}`;
+            statsElements[1].textContent = s.duration || 'Indefinido';
+            statsElements[2].textContent = s.language || '-';
+            statsElements[3].textContent = s.type || '-';
         }
     }
 
@@ -274,28 +277,22 @@ class ProjectsManager {
         if (sectionContent) sectionContent.textContent = project.description;
 
         this.updateExpandedStats(project.stats);
-        this.updateExpandedTechnologies(project.technologies);
-
-        if (project.objectives) {
-            this.updateObjectives(project.objectives);
-        }
-
-        if (project.skills_needed) {
-            this.updateSkillsNeeded(project.skills_needed);
-        }
-
-        if (project.progress) {
-            this.updateProgress(project.progress);
-        }
+        this.updateExpandedTechnologies(project.technologies || []);
+        this.updateObjectives(project.objectives || []);
+        this.updateSkillsNeeded(project.skills_needed || []);
+        this.updateProgress(project.progress || 0);
     }
 
     updateExpandedStats(stats) {
+        const s = stats || {};
         const statValues = document.querySelectorAll('.stat-value');
         if (statValues.length >= 4) {
-            statValues[0].textContent = `${stats.team_current}/${stats.team_max} miembros`;
-            statValues[1].textContent = stats.duration;
-            statValues[2].textContent = stats.language;
-            statValues[3].textContent = stats.type;
+            const current = s.team_current ?? '-';
+            const max = s.team_max ?? '-';
+            statValues[0].textContent = `${current}/${max} miembros`;
+            statValues[1].textContent = s.duration || 'Indefinido';
+            statValues[2].textContent = s.language || '-';
+            statValues[3].textContent = s.type || '-';
         }
     }
 
