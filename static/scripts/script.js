@@ -373,6 +373,7 @@ document.addEventListener('DOMContentLoaded', () => {
         tutorialOverlay.classList.remove('visible');
         tutorialOverlay.setAttribute('aria-hidden', 'true');
         document.body.classList.remove('tutorial-open');
+        localStorage.setItem('stackr_tutorial_seen', '1');
     }
 
     tutorialClose?.addEventListener('click', closeTutorial);
@@ -485,7 +486,9 @@ document.addEventListener('DOMContentLoaded', () => {
     tutorialDemoCard?.addEventListener('pointerup', handleTutorialDemoEnd);
     tutorialDemoCard?.addEventListener('pointercancel', handleTutorialDemoEnd);
 
-    showTutorial();
+    if (!localStorage.getItem('stackr_tutorial_seen')) {
+        showTutorial();
+    }
 
     function setupSwipeHandlers(cardElement) {
         if (!cardElement) return;
@@ -791,34 +794,109 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function showMatchNotification() {
-        // Badge en el link de Chats del sidebar
+        // Badge (punto rojo) en el link de Chats del sidebar
         const chatLinks = document.querySelectorAll('a[href*="chat"]');
         chatLinks.forEach(link => {
             if (!link.querySelector('.notif-badge')) {
                 const badge = document.createElement('span');
                 badge.className = 'notif-badge';
-                badge.textContent = '●';
                 badge.style.cssText = `
-                    color: #4CDB8B; font-size: 0.6rem;
-                    margin-left: 4px; animation: pulse 1.5s infinite;
+                    display:inline-block; width:9px; height:9px;
+                    background:#e74c3c; border-radius:50%;
+                    margin-left:5px; vertical-align:middle;
+                    box-shadow:0 0 6px rgba(231,76,60,0.8);
+                    animation:notifPulse 1.4s ease-in-out infinite;
                 `;
                 link.appendChild(badge);
             }
         });
 
-        // Toast de notificación
-        const toast = document.createElement('div');
-        toast.innerHTML = '🎉 ¡Nuevo match! <a href="/chat" style="color:white;text-decoration:underline;">Ver chat</a>';
-        toast.style.cssText = `
-            position:fixed; bottom:30px; left:50%; transform:translateX(-50%);
-            background:linear-gradient(135deg,#4CDB8B,#2ecc71);
-            color:white; padding:14px 28px; border-radius:24px;
-            font-size:0.95rem; z-index:9999; cursor:pointer;
-            box-shadow:0 4px 20px rgba(0,0,0,0.3);
+        // Overlay de match
+        showMatchOverlay();
+    }
+
+    function showMatchOverlay() {
+        document.getElementById('match-overlay')?.remove();
+
+        const overlay = document.createElement('div');
+        overlay.id = 'match-overlay';
+        overlay.style.cssText = `
+            position:fixed; inset:0; z-index:99999;
+            background:rgba(8,4,18,0.88);
+            display:flex; align-items:center; justify-content:center;
+            backdrop-filter:blur(10px);
+            animation:matchFadeIn 0.35s ease;
         `;
-        document.body.appendChild(toast);
-        toast.addEventListener('click', () => { window.location.href = '/chat'; });
-        setTimeout(() => toast.remove(), 6000);
+
+        overlay.innerHTML = `
+            <style>
+                @keyframes matchFadeIn   { from{opacity:0} to{opacity:1} }
+                @keyframes matchSlideUp  { from{transform:translateY(40px);opacity:0} to{transform:translateY(0);opacity:1} }
+                @keyframes heartPop      { 0%{transform:scale(0) rotate(-15deg);opacity:0}
+                                           60%{transform:scale(1.35) rotate(8deg);opacity:1}
+                                           100%{transform:scale(1) rotate(0deg);opacity:1} }
+                @keyframes notifPulse    { 0%,100%{box-shadow:0 0 6px rgba(231,76,60,0.8)}
+                                           50%{box-shadow:0 0 14px rgba(231,76,60,1)} }
+                @keyframes ringExpand    { 0%{transform:scale(0.6);opacity:0.8}
+                                           100%{transform:scale(2.2);opacity:0} }
+            </style>
+
+            <div style="text-align:center; padding:40px 32px; animation:matchSlideUp 0.5s ease 0.15s both; max-width:420px; width:90%;">
+
+                <!-- Ícono con anillos -->
+                <div style="position:relative; display:inline-flex; align-items:center; justify-content:center; margin-bottom:24px;">
+                    <div style="position:absolute; width:100px; height:100px; border-radius:50%;
+                                border:2px solid rgba(194,123,255,0.5);
+                                animation:ringExpand 1.2s ease 0.6s both;"></div>
+                    <div style="position:absolute; width:100px; height:100px; border-radius:50%;
+                                border:2px solid rgba(194,123,255,0.3);
+                                animation:ringExpand 1.2s ease 0.9s both;"></div>
+                    <div style="font-size:5rem; animation:heartPop 0.6s cubic-bezier(0.34,1.56,0.64,1) 0.3s both;">
+                        💜
+                    </div>
+                </div>
+
+                <h1 style="color:#fff; font-size:2.4rem; font-weight:900; margin:0 0 10px;
+                            letter-spacing:-1px; line-height:1.1;">
+                    ¡Es un match!
+                </h1>
+                <p style="color:#C27BFF; font-size:1.05rem; margin:0 0 36px; opacity:0.9;">
+                    Alguien quiere trabajar con vos 🚀
+                </p>
+
+                <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
+                    <a href="/chat" style="
+                        padding:13px 30px;
+                        background:linear-gradient(135deg,#667eea,#764ba2);
+                        color:#fff; border-radius:28px; text-decoration:none;
+                        font-weight:700; font-size:1rem;
+                        box-shadow:0 6px 24px rgba(102,126,234,0.45);
+                        transition:transform 0.15s ease;
+                    " onmouseover="this.style.transform='scale(1.04)'"
+                       onmouseout="this.style.transform='scale(1)'">
+                        💬 Chatear ahora
+                    </a>
+                    <button onclick="document.getElementById('match-overlay').remove()" style="
+                        padding:13px 30px;
+                        background:rgba(255,255,255,0.1);
+                        color:#fff; border:1px solid rgba(255,255,255,0.25);
+                        border-radius:28px; cursor:pointer; font-size:1rem;
+                        transition:background 0.15s ease;
+                    " onmouseover="this.style.background='rgba(255,255,255,0.18)'"
+                       onmouseout="this.style.background='rgba(255,255,255,0.1)'">
+                        Seguir explorando
+                    </button>
+                </div>
+
+                <p style="color:rgba(255,255,255,0.25); font-size:0.75rem; margin-top:24px;">
+                    Tocá fuera para cerrar
+                </p>
+            </div>
+        `;
+
+        overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+        document.body.appendChild(overlay);
+        setTimeout(() => overlay?.remove(), 12000);
     }
 
     initMatchNotifications();

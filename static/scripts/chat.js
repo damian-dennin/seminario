@@ -202,6 +202,29 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
+    // ── Indicador "Visto" en el último mensaje enviado ────────
+    function markLastMessageSeen() {
+        const container = document.getElementById('messages-container');
+        if (!container) return;
+
+        // Limpiar "visto" previos
+        container.querySelectorAll('.msg-seen').forEach(el => el.remove());
+
+        // Buscar el último mensaje enviado por el usuario
+        const sentMessages = container.querySelectorAll('.message.sent');
+        if (sentMessages.length === 0) return;
+
+        const lastSent = sentMessages[sentMessages.length - 1];
+        const seenEl = document.createElement('div');
+        seenEl.className = 'msg-seen';
+        seenEl.style.cssText = `
+            font-size:0.72rem; color:#C27BFF; text-align:right;
+            margin:-4px 0 6px; padding-right:4px; opacity:0.85;
+        `;
+        seenEl.textContent = '✓✓ Visto';
+        lastSent.insertAdjacentElement('afterend', seenEl);
+    }
+
     // ── Agregar un mensaje al DOM ─────────────────────────────
     function appendMessage(msg, senderName = 'Usuario') {
         if (!msg?.id) return;
@@ -247,7 +270,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                     // Mensajes propios: ya los mostramos al enviar
                     if (msg.sender_id === currentUserId) return;
 
-                    // Mensaje del otro usuario: mostrar con su nombre
+                    // Mensaje del otro usuario: marcar "visto" y mostrar
+                    markLastMessageSeen();
+
                     const senderName = currentMatch
                         ? `${currentMatch.other_user.firstName} ${currentMatch.other_user.lastName}`
                         : 'Usuario';

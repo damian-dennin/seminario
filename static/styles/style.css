@@ -710,7 +710,7 @@ body.dark-mode .dislike-indicator {
 
         .tutorial-demo-stage {
             position: relative;
-            width: min(100%, 700px);
+            width: min(100%, 480px);
             height: clamp(320px, 41vh, 390px);
             border-radius: 22px;
             border: 1px solid rgba(255, 255, 255, 0.1);
@@ -720,9 +720,8 @@ body.dark-mode .dislike-indicator {
                 rgba(255, 255, 255, 0.04);
             overflow: hidden;
             padding: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            display: grid;
+            place-items: center;
             transition: border-color 0.24s ease, box-shadow 0.24s ease, background 0.24s ease;
         }
 
@@ -755,9 +754,9 @@ body.dark-mode .dislike-indicator {
 
         .tutorial-demo-card {
             position: relative;
-            height: min(84%, 340px);
+            height: min(88%, 340px);
             width: auto;
-            max-width: min(100%, 340px);
+            max-width: min(80%, 280px);
             aspect-ratio: 15 / 20;
             border-radius: 24px;
             background: linear-gradient(180deg, #73407c 0%, #56335d 100%);
@@ -910,7 +909,7 @@ body.dark-mode .dislike-indicator {
             display: grid;
             grid-template-columns: repeat(3, minmax(0, 1fr));
             gap: 10px;
-            width: min(100%, 700px);
+            width: min(100%, 480px);
         }
 
         .tutorial-step {
