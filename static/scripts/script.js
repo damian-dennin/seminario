@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const ampliarIndicator = statusIndicators?.querySelector('.ampliar-indicator');
     const swipeFeedback = document.getElementById('swipe-feedback');
     const sidebar = document.getElementById('sidebar');
-    const sidebarTrigger = document.getElementById('sidebar-trigger');
+    const sidebarToggle = document.getElementById('sidebar-toggle');
 
     const createProjectBtn = document.getElementById('create-project-btn');
     const createProjectCard = document.getElementById('create-project-card');
@@ -44,7 +44,6 @@ document.addEventListener('DOMContentLoaded', () => {
     let offsetX = 0;
     let offsetY = 0;
     let isDragging = false;
-    let isHoveringSidebar = false;
     let tutorialDemoDragging = false;
     let tutorialDemoAnimating = false;
     let tutorialDemoStartX = 0;
@@ -96,8 +95,9 @@ document.addEventListener('DOMContentLoaded', () => {
     function setFeedChromeHidden(hidden) {
         document.body.classList.toggle('feed-chrome-hidden', hidden);
 
-        if (hidden && sidebar?.classList.contains('active')) {
-            sidebar.classList.remove('active');
+        if (hidden && sidebar?.classList.contains('sidebar-expanded')) {
+            sidebar.classList.remove('sidebar-expanded');
+            document.body.classList.remove('sidebar-expanded');
         }
     }
 
@@ -515,38 +515,14 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('mousemove', handleMove);
     document.addEventListener('mouseup', handleEnd);
 
-    sidebarTrigger?.addEventListener('mouseenter', () => {
-        if (!isDragging) {
-            isHoveringSidebar = true;
-            sidebar?.classList.add('active');
-        }
-    });
-
-    sidebar?.addEventListener('mouseleave', () => {
-        isHoveringSidebar = false;
-        sidebar.classList.remove('active');
-    });
-
-    document.addEventListener('mousemove', (e) => {
-        const edgeDistance = window.innerWidth - e.clientX;
-
-        if (edgeDistance < 15 && !isDragging && !isHoveringSidebar) {
-            isHoveringSidebar = true;
-            sidebar?.classList.add('active');
-        } else if (
-            edgeDistance > 80 &&
-            !isDragging &&
-            isHoveringSidebar &&
-            e.target.id !== 'sidebar' &&
-            !sidebar?.contains(e.target)
-        ) {
-            isHoveringSidebar = false;
-            sidebar?.classList.remove('active');
-        }
+    sidebarToggle?.addEventListener('click', () => {
+        sidebar?.classList.toggle('sidebar-expanded');
+        document.body.classList.toggle('sidebar-expanded');
     });
 
     function handleStart(e) {
         if (expandedView) return;
+        if (e.type === 'mousedown' && window.matchMedia('(min-width: 768px)').matches) return;
 
         card = document.getElementById('project-card');
         if (!card) return;
@@ -561,8 +537,9 @@ document.addEventListener('DOMContentLoaded', () => {
             createProjectBtn.style.opacity = '0';
         }
 
-        if (sidebar?.classList.contains('active')) {
-            sidebar.classList.remove('active');
+        if (sidebar?.classList.contains('sidebar-expanded')) {
+            sidebar.classList.remove('sidebar-expanded');
+            document.body.classList.remove('sidebar-expanded');
         }
 
         if (e.type === 'mousedown') {
@@ -736,6 +713,45 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    function triggerSwipe(direction) {
+        card = document.getElementById('project-card');
+        if (!card || expandedView) return;
+
+        card.style.transition = 'transform 0.5s ease';
+
+        if (direction === 'right') {
+            setSwipeFeedback('right', 1);
+            card.style.transform = `translate(${window.innerWidth}px, 0) rotate(30deg)`;
+            setTimeout(() => {
+                resetCard();
+                handleSwipe('right');
+                setFeedChromeHidden(false);
+            }, 500);
+        } else if (direction === 'left') {
+            setSwipeFeedback('left', 1);
+            card.style.transform = `translate(-${window.innerWidth}px, 0) rotate(-30deg)`;
+            setTimeout(() => {
+                resetCard();
+                handleSwipe('left');
+                setFeedChromeHidden(false);
+            }, 500);
+        } else if (direction === 'up') {
+            setSwipeFeedback('up', 1);
+            card.style.transform = `translate(0px, -${window.innerHeight}px) rotate(0deg)`;
+            setTimeout(() => {
+                expandedCard?.classList.remove('hidden');
+                expandedCard?.classList.add('visible');
+                expandedView = true;
+                card.style.transition = 'none';
+                card.style.opacity = '0';
+                card.style.transform = 'translate(0, 0) rotate(0deg)';
+                card.style.transition = 'opacity 0.3s ease';
+                card.style.opacity = '1';
+                clearSwipeFeedback();
+            }, 500);
+        }
+    }
+
     function showMatchToast(message) {
         const toast = document.createElement('div');
         toast.textContent = message;
@@ -764,6 +780,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     window.handleSwipe = handleSwipe;
     window.setupSwipeHandlers = setupSwipeHandlers;
+    window.triggerSwipe = triggerSwipe;
+
+    document.getElementById('btn-dislike')?.addEventListener('click', () => triggerSwipe('left'));
+    document.getElementById('btn-like')?.addEventListener('click', () => triggerSwipe('right'));
+    document.getElementById('btn-expand')?.addEventListener('click', () => triggerSwipe('up'));
 
     // ── Notificaciones de match en tiempo real ────────────────
     async function initMatchNotifications() {

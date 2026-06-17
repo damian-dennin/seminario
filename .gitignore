@@ -6,3 +6,4 @@ users_database.json
 projects_database.json
 .env
 *.sqlite
+*.md
