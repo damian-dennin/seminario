@@ -78,7 +78,7 @@
         }
 
         .feed-chrome-hidden .sidebar {
-            transform: translateX(14px);
+            transform: translateX(-14px);
             opacity: 0;
             pointer-events: none;
         }
@@ -181,14 +181,7 @@
         }
 
         .logo-container {
-            position: absolute;
-            top: 32px;
-            left: 32px;
-            z-index: 1001; /* Por encima de los indicadores */
-            display: flex;
-            align-items: center;
-            gap: 0;
-            width: auto;
+            display: none;
         }
         
         
@@ -1083,8 +1076,7 @@ body.dark-mode .dislike-indicator {
                 max-width: 430px;
             }
 
-            .sidebar.active,
-            .sidebar:hover {
+            .sidebar.sidebar-expanded {
                 width: 204px;
             }
         }
@@ -1168,42 +1160,64 @@ body.dark-mode .dislike-indicator {
         /* Sidebar menu styles */
         .sidebar {
             position: fixed;
-            top: 24px;
-            right: 24px;
+            top: 0;
+            left: 0;
             width: 78px;
-            height: calc(100vh - 48px);
-            max-height: 760px;
+            height: 100vh;
             background: linear-gradient(180deg, rgba(97, 58, 103, 0.96) 0%, rgba(70, 30, 84, 0.94) 100%);
-            transition: width 0.28s ease, box-shadow 0.28s ease, transform 0.28s ease;
-            z-index: 1000;
+            transition: width 0.28s ease, box-shadow 0.28s ease, transform 0.28s ease, opacity 0.22s ease;
+            z-index: 1005;
             display: flex;
             flex-direction: column;
             align-items: stretch;
             justify-content: space-between;
             padding: 16px 12px;
-            box-shadow: 0 22px 48px rgba(36, 5, 53, 0.24);
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            border-radius: 30px;
+            box-shadow: 4px 0 24px rgba(36, 5, 53, 0.18);
+            border: none;
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 0 20px 20px 0;
             overflow: hidden;
-            z-index: 1005;
             backdrop-filter: blur(18px);
-            transition: width 0.28s ease, box-shadow 0.28s ease, transform 0.28s ease, opacity 0.22s ease;
         }
 
-        .sidebar.active,
-        .sidebar:hover {
+        .sidebar.sidebar-expanded {
             width: 224px;
-            transform: translateX(0);
-            box-shadow: 0 28px 56px rgba(36, 5, 53, 0.32);
+            box-shadow: 4px 0 32px rgba(36, 5, 53, 0.28);
+        }
+
+        .sidebar.sidebar-expanded ~ * .expanded-card,
+        body.sidebar-expanded .expanded-card {
+            left: 224px;
+        }
+
+        .sidebar-toggle-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: rgba(244, 232, 255, 0.9);
+            cursor: pointer;
+            font-size: 16px;
+            line-height: 1;
+            transition: background 0.2s ease, transform 0.28s ease;
+            flex-shrink: 0;
+            padding: 0;
+        }
+
+        .sidebar-toggle-btn:hover {
+            background: rgba(255, 255, 255, 0.22);
+        }
+
+        .sidebar.sidebar-expanded .sidebar-toggle-btn {
+            transform: scaleX(-1);
         }
 
         .sidebar-trigger {
-            position: fixed;
-            top: 0;
-            right: 0;
-            width: 30px;
-            height: 100vh;
-            z-index: 999;
+            display: none;
         }
 
         .sidebar-brand {
@@ -1242,8 +1256,7 @@ body.dark-mode .dislike-indicator {
             font-size: 12px;
         }
 
-        .sidebar.active .sidebar-brand-copy,
-        .sidebar:hover .sidebar-brand-copy {
+        .sidebar.sidebar-expanded .sidebar-brand-copy {
             opacity: 1;
             transform: translateX(0);
         }
@@ -1292,7 +1305,7 @@ body.dark-mode .dislike-indicator {
         .sidebar-link:hover {
             background: rgba(255, 255, 255, 0.08);
             color: #fff;
-            transform: translateX(-2px);
+            transform: translateX(2px);
         }
 
         .sidebar-link-active {
@@ -1313,10 +1326,8 @@ body.dark-mode .dislike-indicator {
             white-space: nowrap;
         }
 
-        .sidebar.active .sidebar-label,
-        .sidebar.active .sidebar-footer-label,
-        .sidebar:hover .sidebar-label,
-        .sidebar:hover .sidebar-footer-label {
+        .sidebar.sidebar-expanded .sidebar-label,
+        .sidebar.sidebar-expanded .sidebar-footer-label {
             opacity: 1;
             transform: translateX(0);
         }
@@ -1353,16 +1364,14 @@ body.dark-mode .dislike-indicator {
             overflow: hidden;
         }
 
-        .sidebar.active .sidebar-footer,
-        .sidebar:hover .sidebar-footer {
+        .sidebar.sidebar-expanded .sidebar-footer {
             flex-direction: row;
             justify-content: space-between;
             align-items: center;
             padding-inline: 6px;
         }
 
-        .sidebar.active .sidebar-footer-label,
-        .sidebar:hover .sidebar-footer-label {
+        .sidebar.sidebar-expanded .sidebar-footer-label {
             max-width: 80px;
         }
 
@@ -1474,20 +1483,15 @@ body.dark-mode .dislike-indicator {
 
      .expanded-card {
         position: fixed;
-        top: 3vh;
-        left: 3vw;
-        width: 94vw;
-        height: 94vh;
+        top: 12px;
+        left: 78px;
+        right: 12px;
+        width: auto;
+        height: calc(100vh - 24px);
         background: linear-gradient(135deg, #613A67 0%, #4a2c50 100%);
-        border-radius: 25px;
+        border-radius: 20px;
         padding: 0;
-        top: 3vh;
-        left: 3vw;
-        width: 94vw;
-        height: 94vh;
-        background: linear-gradient(135deg, #613A67 0%, #4a2c50 100%);
-        border-radius: 25px;
-        padding: 0;
+        transition: left 0.28s ease;
         color: #D4BDE8;
         box-shadow: 0 20px 60px rgba(0,0,0,0.3), 0 0 0 1px rgba(255,255,255,0.1);
         z-index: 1002;
@@ -2437,6 +2441,76 @@ body.dark-mode .viewing-progress {
     line-height: 1;
 }
 
+/* ── Botones de acción para escritorio ─────────────────────── */
+.desktop-actions {
+    display: none; /* oculto en mobile — el swipe táctil los reemplaza */
+}
+
+@media (min-width: 768px) {
+    .desktop-actions {
+        display: flex;
+        gap: 14px;
+        justify-content: center;
+        align-items: center;
+        position: fixed;
+        bottom: 110px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 999;
+    }
+
+    .action-btn {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 13px 24px;
+        border: none;
+        border-radius: 50px;
+        font-size: 15px;
+        font-weight: 600;
+        color: white;
+        cursor: pointer;
+        transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+        white-space: nowrap;
+        min-width: 155px;
+        justify-content: center;
+    }
+
+    .action-btn:hover {
+        transform: translateY(-3px);
+    }
+
+    .action-btn:active {
+        transform: translateY(0);
+        opacity: 0.85;
+    }
+
+    .action-icon {
+        font-size: 17px;
+        line-height: 1;
+    }
+
+    .action-dislike {
+        background: linear-gradient(135deg, #c0392b, #FF636E);
+        box-shadow: 0 8px 24px rgba(255, 99, 110, 0.35);
+    }
+
+    .action-expand {
+        background: linear-gradient(135deg, #1a6ca8, #54BEFF);
+        box-shadow: 0 8px 24px rgba(84, 190, 255, 0.35);
+    }
+
+    .action-like {
+        background: linear-gradient(135deg, #1e9e5e, #4CDB8B);
+        box-shadow: 0 8px 24px rgba(76, 219, 139, 0.35);
+    }
+
+    /* ocultar hints de swipe táctil en desktop */
+    .status-indicators {
+        display: none;
+    }
+}
+
 
 .create-project-card {
     position: fixed;
@@ -2769,8 +2843,12 @@ body.dark-mode .viewing-progress {
     }
 
     #expanded-card {
-        margin-top: 80px; 
+        left: 0;
+        right: 0;
+        top: 0;
+        margin-top: 80px;
         height: 80%;
+        border-radius: 20px;
     }
     .sidebar {
         display: none;

@@ -47,6 +47,7 @@
             </button>
         </div>
         <div class="sidebar-footer">
+            <button class="sidebar-toggle-btn" id="sidebar-toggle" aria-label="Expandir menú">›</button>
             <div class="sidebar-theme-meta">
                 <span class="menu-icon theme"></span>
                 <span class="sidebar-footer-label">Tema</span>
@@ -57,7 +58,6 @@
             </label>
         </div>
     </div>
-    <div class="sidebar-trigger" id="sidebar-trigger"></div>
 
     <div class="mobile-header" id="mobile-header">
         <img src="/static/imagenes/logoTomberS.png" alt="Logo Tomber Sur" class="logo-img-mini">        
@@ -179,6 +179,21 @@
         <div class="dislike-indicator">PASAR</div>
         <div class="ampliar-indicator">SWIPE UP · VER MAS</div>
         <div class="like-indicator">MATCH</div>
+    </div>
+
+    <div class="desktop-actions" id="desktop-actions">
+        <button class="action-btn action-dislike" id="btn-dislike" title="No me interesa">
+            <span class="action-icon">✕</span>
+            No me interesa
+        </button>
+        <button class="action-btn action-expand" id="btn-expand" title="Ver más">
+            <span class="action-icon">↑</span>
+            Ver más
+        </button>
+        <button class="action-btn action-like" id="btn-like" title="Me interesa">
+            <span class="action-icon">♥</span>
+            Me interesa
+        </button>
     </div>
 
     <div class="create-project-container" style="display:flex; gap:10px; flex-wrap:wrap; justify-content:center;">
