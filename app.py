@@ -244,10 +244,19 @@ def get_projects():
     if 'user_id' not in session:
         return jsonify({'error': 'No autorizado'}), 401
     all_projects = sb_get('projects')
-    visible_projects = [p for p in all_projects if p.get('creator_id') != session['user_id']]
+
+    def is_hidden(p):
+        return p.get('moderation_status') in ('flagged', 'hidden')
+
+    visible_projects = [
+        p for p in all_projects
+        if p.get('creator_id') != session['user_id'] and not is_hidden(p)
+    ]
     # Si todos los proyectos pertenecen al usuario actual (caso demo/seed),
-    # devolvemos igualmente el catálogo para no dejar el feed vacío.
-    return jsonify(visible_projects or all_projects)
+    # devolvemos igualmente el catálogo para no dejar el feed vacío
+    # (pero siempre filtrando los flagged/hidden por moderación).
+    fallback = [p for p in all_projects if not is_hidden(p)]
+    return jsonify(visible_projects or fallback)
 
 
 @app.route('/api/projects/<int:project_id>')
@@ -325,23 +334,52 @@ def search_projects():
     if 'user_id' not in session:
         return jsonify({'error': 'No autorizado'}), 401
 
-    query = request.args.get('q', '').lower()
+    query    = request.args.get('q', '').lower()
+    duration = request.args.get('duration', '').lower()
+    org_type = request.args.get('org_type', '').lower()
+
     all_projects = sb_get('projects')
 
-    filtered = []
-    for project in all_projects:
+    def matches_text(project):
+        if not query:
+            return True
         if query in project.get('title', '').lower():
-            filtered.append(project)
-            continue
+            return True
         for tech in project.get('technologies', []):
             if query in tech.get('name', '').lower():
-                filtered.append(project)
-                break
-        else:
-            for skill in project.get('skills_needed', []):
-                if query in skill.lower():
-                    filtered.append(project)
-                    break
+                return True
+        for skill in project.get('skills_needed', []):
+            if query in skill.lower():
+                return True
+        return False
+
+    def matches_duration(project):
+        if not duration:
+            return True
+        stats = project.get('stats') or {}
+        proj_dur = (stats.get('duration') or '').lower()
+        if duration == 'indefinido':
+            return 'indefinido' in proj_dur or proj_dur == ''
+        if duration == 'corto':
+            return any(k in proj_dur for k in ['semana', 'día', 'dia', '1 mes', 'un mes'])
+        if duration == 'medio':
+            return any(k in proj_dur for k in ['2 mes', '3 mes', '4 mes', '5 mes', '6 mes'])
+        if duration == 'largo':
+            return any(k in proj_dur for k in ['año', 'anio', '+6', '7 mes', '8 mes', '9 mes', '10 mes', '11 mes', '12 mes'])
+        return duration in proj_dur
+
+    def matches_org_type(project):
+        if not org_type:
+            return True
+        stats = project.get('stats') or {}
+        proj_org = (stats.get('org_type') or '').lower()
+        return org_type in proj_org
+
+    def not_hidden(p):
+        return p.get('moderation_status') not in ('flagged', 'hidden')
+
+    filtered = [p for p in all_projects
+                if matches_text(p) and matches_duration(p) and matches_org_type(p) and not_hidden(p)]
 
     return jsonify(filtered)
 
@@ -695,6 +733,61 @@ def get_config():
         'supabaseUrl':  SUPABASE_PROJECT,
         'supabaseKey':  SUPABASE_KEY,
         'currentUserId': session['user_id']
+    })
+
+
+REPORT_REASONS = {'trabajo_encubierto', 'spam', 'ghosting', 'abuso'}
+REPORT_FLAG_THRESHOLD = 3  # cantidad de reportes para auto-ocultar del feed público
+
+
+@app.route('/api/reports', methods=['POST'])
+def create_report():
+    if 'user_id' not in session:
+        return jsonify({'error': 'No autorizado'}), 401
+
+    data = request.get_json() or {}
+    project_id = data.get('project_id')
+    detail     = data.get('detail', '')
+    reason     = data.get('reason', 'trabajo_encubierto')
+
+    if not project_id:
+        return jsonify({'error': 'project_id requerido'}), 400
+    if reason not in REPORT_REASONS:
+        reason = 'trabajo_encubierto'
+
+    # Evitar reportes duplicados del mismo usuario al mismo proyecto
+    existing = sb_get('reports', {
+        'project_id':  f'eq.{project_id}',
+        'reporter_id': f'eq.{session["user_id"]}'
+    })
+    if existing:
+        return jsonify({'message': 'Ya reportaste este proyecto'}), 200
+
+    report = sb_insert('reports', {
+        'project_id':  project_id,
+        'reporter_id': session['user_id'],
+        'reason':      reason,
+        'detail':      detail
+    })
+
+    # Auto-moderación: al llegar al umbral, el proyecto se oculta del feed
+    # público hasta que alguien lo revise manualmente (moderation_status).
+    all_reports = sb_get('reports', {'project_id': f'eq.{project_id}'})
+    flagged = len(all_reports) >= REPORT_FLAG_THRESHOLD
+    if flagged:
+        sb_update('projects', {'id': f'eq.{project_id}'}, {'moderation_status': 'flagged'})
+
+    return jsonify({**report, 'project_flagged': flagged}), 201
+
+
+@app.route('/api/reports/<int:project_id>', methods=['GET'])
+def get_report_count(project_id):
+    if 'user_id' not in session:
+        return jsonify({'error': 'No autorizado'}), 401
+    reports = sb_get('reports', {'project_id': f'eq.{project_id}'})
+    return jsonify({
+        'count': len(reports),
+        'flagged': len(reports) >= REPORT_FLAG_THRESHOLD
     })
 
 

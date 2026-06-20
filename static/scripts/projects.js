@@ -230,6 +230,18 @@ class ProjectsManager {
         if (descElement) descElement.textContent = project.description;
         this.updateTechnologies(project.technologies);
 
+        // Badge de verificación anti-trabajo-encubierto
+        const declaredBadge = document.getElementById('declared-badge');
+        const expandedDeclaredBadge = document.getElementById('expanded-declared-badge');
+        const reportBtn = document.getElementById('report-btn');
+        if (declaredBadge) declaredBadge.style.display = project.declared ? 'inline-flex' : 'none';
+        if (expandedDeclaredBadge) expandedDeclaredBadge.style.display = project.declared ? 'flex' : 'none';
+        if (reportBtn) {
+            reportBtn.textContent = '⚑ Reportar como trabajo encubierto';
+            reportBtn.disabled = false;
+            reportBtn.style.opacity = '1';
+        }
+
         // Asegurar que los eventos están conectados
         if (!this.eventHandlersAttached) {
             this.setupEventListeners();
@@ -281,6 +293,57 @@ class ProjectsManager {
         this.updateObjectives(project.objectives || []);
         this.updateSkillsNeeded(project.skills_needed || []);
         this.updateProgress(project.progress || 0);
+        this.updateCollaborationDetails(project.stats);
+    }
+
+    updateCollaborationDetails(stats) {
+        const container = document.getElementById('collaboration-details');
+        if (!container) return;
+        const s = stats || {};
+
+        const labels = {
+            project_nature: {
+                open_source: 'Open Source', portfolio: 'Portfolio', mvp: 'MVP',
+                startup: 'Startup', hackathon: 'Hackathon', research: 'Investigación',
+                impacto_social: 'Impacto Social'
+            },
+            project_stage: {
+                idea: 'Idea', prototipo: 'Prototipo', mvp: 'MVP',
+                validacion: 'Validación', en_curso: 'En Curso'
+            },
+            collaboration_mode: {
+                puntual: 'Puntual', continuo: 'Continuo', exploratorio: 'Exploratorio'
+            }
+        };
+
+        const rows = [];
+        if (s.project_nature) rows.push(['Naturaleza', labels.project_nature[s.project_nature] || s.project_nature]);
+        if (s.project_stage) rows.push(['Etapa', labels.project_stage[s.project_stage] || s.project_stage]);
+        if (s.collaboration_mode) rows.push(['Modo de colaboración', labels.collaboration_mode[s.collaboration_mode] || s.collaboration_mode]);
+        if (s.weekly_commitment_hours) rows.push(['Dedicación semanal', s.weekly_commitment_hours]);
+
+        let html = '';
+        if (rows.length) {
+            html += '<div class="collab-detail-grid">';
+            rows.forEach(([label, value]) => {
+                html += `<div class="collab-detail-item"><span class="collab-detail-label">${label}</span><span class="collab-detail-value">${value}</span></div>`;
+            });
+            html += '</div>';
+        }
+        if (s.expected_contribution) {
+            html += `<p class="collab-detail-text"><strong>Qué se espera de quien se suma:</strong> ${s.expected_contribution}</p>`;
+        }
+        if (Array.isArray(s.offered_value) && s.offered_value.length) {
+            const valueLabels = { aprendizaje: 'Aprendizaje', portfolio: 'Portfolio', networking: 'Networking', equity: 'Equity', impacto: 'Impacto' };
+            html += '<div class="collab-detail-tags">' +
+                s.offered_value.map(v => `<span class="collab-detail-tag">${valueLabels[v] || v}</span>`).join('') +
+                '</div>';
+        }
+        if (s.organizer_statement) {
+            html += `<p class="collab-detail-text collab-detail-statement"><strong>Por qué se impulsa este proyecto:</strong> ${s.organizer_statement}</p>`;
+        }
+
+        container.innerHTML = html || '<p class="collab-detail-empty">Sin información adicional declarada.</p>';
     }
 
     updateExpandedStats(stats) {
@@ -463,10 +526,29 @@ class ProjectsManager {
             this.projects = filteredProjects;
             this.resetViewedProjects();
             this.currentProjectIndex = 0;
-            this.eventHandlersAttached = false; // Reset flag
+            this.eventHandlersAttached = false;
             this.renderCurrentProject();
         } catch (error) {
             console.error('Error en búsqueda:', error);
+        }
+    }
+
+    async applyFilters({ duration = '', org_type = '' } = {}) {
+        try {
+            const params = new URLSearchParams();
+            if (duration) params.set('duration', duration);
+            if (org_type) params.set('org_type', org_type);
+            const url = `${this.apiUrl}/search?${params.toString()}`;
+            const response = await fetch(url);
+            if (!response.ok) throw new Error('Error al filtrar');
+            const filtered = await response.json();
+            this.projects = filtered;
+            this.resetViewedProjects();
+            this.currentProjectIndex = 0;
+            this.eventHandlersAttached = false;
+            this.renderCurrentProject();
+        } catch (error) {
+            console.error('Error aplicando filtros:', error);
         }
     }
 

@@ -223,6 +223,23 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // ── Botones táctiles mobile (swipe actions) ───────────────
+    function openExpandedCard() {
+        if (expandedView || !expandedCard) return;
+        expandedCard.classList.remove('hidden');
+        setTimeout(() => expandedCard.classList.add('visible'), 10);
+        expandedView = true;
+    }
+
+    document.getElementById('mobile-action-pass')?.addEventListener('click', () => triggerSwipe('left'));
+    document.getElementById('mobile-action-like')?.addEventListener('click', () => triggerSwipe('right'));
+    document.getElementById('mobile-action-info')?.addEventListener('click', openExpandedCard);
+    document.getElementById('mobile-action-create')?.addEventListener('click', () => {
+        if (!createProjectCard) return;
+        createProjectCard.classList.remove('hidden');
+        setTimeout(() => createProjectCard.classList.add('visible'), 10);
+    });
+
     // Sube imagen de proyecto y retorna la URL pública, o '' si no hay imagen
     async function uploadProjectImage(file) {
         if (!file) return '';
@@ -243,6 +260,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     createForm?.addEventListener('submit', async (e) => {
         e.preventDefault();
+        const declCheck = document.getElementById('declaration-check');
+        const declWarning = document.getElementById('declaration-warning');
+        if (declCheck && !declCheck.checked) {
+            if (declWarning) declWarning.style.display = 'block';
+            document.getElementById('declaration-box')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            return;
+        }
+        if (declWarning) declWarning.style.display = 'none';
 
         const submitBtn = createForm.querySelector('button[type="submit"]');
         if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Creando...'; }
@@ -265,6 +290,10 @@ document.addEventListener('DOMContentLoaded', () => {
             .map((skill) => skill.trim())
             .filter(Boolean);
 
+        const offeredValue = Array.from(
+            document.querySelectorAll('#offered-value-chips input[type="checkbox"]:checked')
+        ).map((input) => input.value);
+
         // Subir imagen si el usuario seleccionó una
         const imageUrl = await uploadProjectImage(selectedImageFile);
 
@@ -278,8 +307,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 team_max: teamMax,
                 duration: document.getElementById('duration').value || 'Indefinido',
                 language: document.getElementById('language').value,
-                type: document.getElementById('project-type').value
+                type: document.getElementById('project-type').value,
+                org_type: document.getElementById('org-type')?.value || '',
+                project_nature: document.getElementById('project-nature')?.value || '',
+                project_stage: document.getElementById('project-stage')?.value || '',
+                collaboration_mode: document.getElementById('collaboration-mode')?.value || '',
+                weekly_commitment_hours: document.getElementById('weekly-commitment')?.value || '',
+                expected_contribution: document.getElementById('expected-contribution')?.value || '',
+                offered_value: offeredValue,
+                organizer_statement: document.getElementById('organizer-statement')?.value || ''
             },
+            declared: document.getElementById('declaration-check')?.checked || false,
             technologies,
             skills_needed: skillsNeeded,
             objectives: [],
@@ -755,8 +793,9 @@ document.addEventListener('DOMContentLoaded', () => {
     function showMatchToast(message) {
         const toast = document.createElement('div');
         toast.textContent = message;
+        const isMobile = window.innerWidth <= 768;
         toast.style.cssText = `
-            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+            position: fixed; bottom: ${isMobile ? '90px' : '30px'}; left: 50%; transform: translateX(-50%);
             background: #667eea; color: white; padding: 12px 24px;
             border-radius: 24px; font-size: 0.95rem; z-index: 9999;
             box-shadow: 0 4px 16px rgba(0,0,0,0.3);
@@ -765,6 +804,109 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.appendChild(toast);
         setTimeout(() => toast.remove(), 2500);
     }
+
+
+
+    // ── Reporte anti-trabajo-encubierto ───────────────────────
+    const reportBtn = document.getElementById('report-btn');
+
+    reportBtn?.addEventListener('click', async () => {
+        if (!window.projectsManager) return;
+        const project = window.projectsManager.projects?.[window.projectsManager.currentProjectIndex];
+        if (!project) return;
+
+        const reasonSelect = document.getElementById('report-reason-select');
+        const reason = reasonSelect?.value || 'trabajo_encubierto';
+        const reasonLabels = {
+            trabajo_encubierto: 'trabajo encubierto o no remunerado',
+            spam: 'spam',
+            ghosting: 'ghosting',
+            abuso: 'abuso'
+        };
+
+        const confirmed = confirm(`¿Querés reportar este proyecto por ${reasonLabels[reason] || reason}?\n\nTu reporte será revisado.`);
+        if (!confirmed) return;
+
+        try {
+            const res = await fetch('/api/reports', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ project_id: project.id, reason })
+            });
+            const data = await res.json();
+            if (res.ok || res.status === 200) {
+                reportBtn.textContent = '✓ Reportado';
+                reportBtn.disabled = true;
+                reportBtn.style.opacity = '0.5';
+                if (reasonSelect) reasonSelect.disabled = true;
+                if (data.project_flagged) {
+                    reportBtn.title = 'Este proyecto fue ocultado del feed por acumular reportes';
+                }
+            }
+        } catch (err) {
+            console.error('Error enviando reporte:', err);
+        }
+    });
+
+    // ── Panel de filtros ──────────────────────────────────────
+    const filterToggleBtn  = document.getElementById('filter-toggle-btn');
+    const filterPanel      = document.getElementById('filter-panel');
+    const filterOverlay    = document.getElementById('filter-overlay');
+    const filterPanelClose = document.getElementById('filter-panel-close');
+    const filterApplyBtn   = document.getElementById('filter-apply-btn');
+    const filterActiveDot  = document.getElementById('filter-active-dot');
+
+    let activeFilters = { duration: '', org_type: '' };
+
+    function openFilterPanel() {
+        filterPanel?.classList.add('open');
+        filterOverlay?.classList.add('visible');
+        filterPanel?.setAttribute('aria-hidden', 'false');
+    }
+
+    function closeFilterPanel() {
+        filterPanel?.classList.remove('open');
+        filterOverlay?.classList.remove('visible');
+        filterPanel?.setAttribute('aria-hidden', 'true');
+    }
+
+    function updateFilterDot() {
+        const hasActive = activeFilters.duration || activeFilters.org_type;
+        filterActiveDot?.classList.toggle('visible', !!hasActive);
+    }
+
+    // Chips: selección única por grupo
+    document.querySelectorAll('#filter-duration .filter-chip').forEach(chip => {
+        chip.addEventListener('click', () => {
+            document.querySelectorAll('#filter-duration .filter-chip').forEach(c => c.classList.remove('active'));
+            chip.classList.add('active');
+            activeFilters.duration = chip.dataset.value;
+        });
+    });
+
+    document.querySelectorAll('#filter-org-type .filter-chip').forEach(chip => {
+        chip.addEventListener('click', () => {
+            document.querySelectorAll('#filter-org-type .filter-chip').forEach(c => c.classList.remove('active'));
+            chip.classList.add('active');
+            activeFilters.org_type = chip.dataset.value;
+        });
+    });
+
+    // Inicializar "Todas" como activo
+    document.querySelector('#filter-duration .filter-chip')?.classList.add('active');
+    document.querySelector('#filter-org-type .filter-chip')?.classList.add('active');
+
+    filterToggleBtn?.addEventListener('click', openFilterPanel);
+    filterOverlay?.addEventListener('click', closeFilterPanel);
+    filterPanelClose?.addEventListener('click', closeFilterPanel);
+
+    filterApplyBtn?.addEventListener('click', async () => {
+        closeFilterPanel();
+        updateFilterDot();
+        if (window.projectsManager) {
+            await window.projectsManager.applyFilters(activeFilters);
+        }
+    });
 
     fetch('/api/user/projects')
         .then((response) => response.json())

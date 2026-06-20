@@ -47,7 +47,28 @@ CREATE TABLE IF NOT EXISTS projects (
   updated_at    DATE DEFAULT CURRENT_DATE
 );
 
+-- Campo de declaración anti-trabajo-encubierto en proyectos
+ALTER TABLE projects ADD COLUMN IF NOT EXISTS declared BOOLEAN DEFAULT FALSE;
+
+-- Estado de moderación: se actualiza automáticamente cuando un proyecto
+-- acumula reportes (ver app.py / create_report). 'active' visible normal,
+-- 'flagged' oculto del feed público (visible solo a su creador con aviso),
+-- 'under_review'/'hidden' reservados para moderación manual futura.
+ALTER TABLE projects ADD COLUMN IF NOT EXISTS moderation_status TEXT DEFAULT 'active';
+
+-- Tabla de reportes
+-- reason acepta: 'trabajo_encubierto' | 'spam' | 'ghosting' | 'abuso'
+CREATE TABLE IF NOT EXISTS reports (
+  id           SERIAL PRIMARY KEY,
+  project_id   INTEGER REFERENCES projects(id) ON DELETE CASCADE,
+  reporter_id  INTEGER REFERENCES users(id) ON DELETE SET NULL,
+  reason       TEXT NOT NULL DEFAULT 'trabajo_encubierto',
+  detail       TEXT DEFAULT '',
+  created_at   TIMESTAMPTZ DEFAULT NOW()
+);
+
 -- Deshabilitar Row Level Security para desarrollo (MVP)
 -- En producción habría que configurar políticas RLS en vez de esto
-ALTER TABLE users DISABLE ROW LEVEL SECURITY;
+ALTER TABLE users    DISABLE ROW LEVEL SECURITY;
 ALTER TABLE projects DISABLE ROW LEVEL SECURITY;
+ALTER TABLE reports  DISABLE ROW LEVEL SECURITY;
