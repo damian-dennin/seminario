@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 
 load_dotenv()  # carga variables desde .env si existe
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder='Templates')
 app.secret_key = os.environ.get('SECRET_KEY', 'dev-secret-local-only')
 
 # --- Conexión a Supabase via REST API ---
