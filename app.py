@@ -127,7 +127,8 @@ def register():
         }), 201
 
     except Exception as e:
-        return jsonify({'error': f'Error en el registro: {str(e)}'}), 500
+        app.logger.error('register error: %s', e)
+        return jsonify({'error': 'No se pudo completar el registro. Intentá de nuevo.'}), 500
 
 
 @app.route('/api/login', methods=['POST'])
@@ -157,7 +158,8 @@ def login():
         }), 200
 
     except Exception as e:
-        return jsonify({'error': f'Error en el login: {str(e)}'}), 500
+        app.logger.error('login error: %s', e)
+        return jsonify({'error': 'Credenciales inválidas o error interno. Intentá de nuevo.'}), 500
 
 
 @app.route('/api/logout', methods=['POST'])
@@ -214,7 +216,8 @@ def update_user_profile():
         return jsonify(user)
 
     except Exception as e:
-        return jsonify({'error': f'Error actualizando perfil: {str(e)}'}), 500
+        app.logger.error('update_profile error: %s', e)
+        return jsonify({'error': 'No se pudo actualizar el perfil. Intentá de nuevo.'}), 500
 
 
 # ============================================================

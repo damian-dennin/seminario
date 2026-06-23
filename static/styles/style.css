@@ -342,6 +342,16 @@
             color: #f3e8ff;
             display: inline-block;
             line-height: 1.2;
+            text-transform: capitalize;
+        }
+
+        @keyframes bio-loading-pulse {
+            0%, 100% { opacity: 0.25; }
+            50% { opacity: 0.5; }
+        }
+
+        .bio-loading-anim {
+            animation: bio-loading-pulse 1.4s ease-in-out infinite;
         }
 
         .card-image {
@@ -699,8 +709,9 @@ body.dark-mode .dislike-indicator {
             display: grid;
             grid-template-rows: auto auto auto;
             justify-items: center;
-            gap: 14px;
+            gap: 16px;
             align-items: stretch;
+            width: 100%;
         }
 
         .tutorial-demo {
@@ -912,19 +923,19 @@ body.dark-mode .dislike-indicator {
             display: grid;
             grid-template-columns: repeat(3, minmax(0, 1fr));
             gap: 10px;
-            width: min(100%, 480px);
+            width: 100%;
         }
 
         .tutorial-step {
             min-height: 0;
-            padding: 12px 14px;
+            padding: 16px 14px;
             background: rgba(255, 255, 255, 0.06);
             border-radius: 18px;
             border: 1px solid rgba(255, 255, 255, 0.1);
-            display: grid;
-            grid-template-columns: auto 1fr;
-            align-items: center;
-            gap: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 8px;
         }
 
         .tutorial-step + .tutorial-step::before {
@@ -944,8 +955,8 @@ body.dark-mode .dislike-indicator {
         }
 
         .tutorial-step-badge {
-            align-self: center;
-            padding: 7px 10px;
+            align-self: flex-start;
+            padding: 6px 10px;
             border-radius: 999px;
             font-size: 10px;
             font-weight: 700;
@@ -953,7 +964,6 @@ body.dark-mode .dislike-indicator {
             text-transform: uppercase;
             background: rgba(255, 255, 255, 0.12);
             color: rgba(255, 255, 255, 0.9);
-            white-space: nowrap;
         }
 
         .tutorial-step-copy {
@@ -1604,8 +1614,9 @@ body.dark-mode .dislike-indicator {
 }
 
 .status-badge.active {
-    background: linear-gradient(135deg, #4CAF50, #45a049);
-    color: white;
+    background: linear-gradient(135deg, #7c4dcc, #5c2d99);
+    color: #f3e8ff;
+    border: 1px solid rgba(194, 123, 255, 0.3);
 }
 
 .priority-badge.high {
@@ -2381,6 +2392,15 @@ body.dark-mode .viewing-progress {
     align-items: center;
     gap: 22px;
     margin: 22px;
+}
+
+/* Los íconos del header mobile: forzar color claro sobre el fondo violeta.
+   Cubre <a>, <span> y <div> usados como íconos según el template */
+.mobile-header .menu-icon,
+.mobile-header a,
+.mobile-header span.menu-icon,
+.mobile-header div.menu-icon {
+    color: rgba(244, 232, 255, 0.88);
 }
 
 .mobile-header .toggle-switch {
@@ -3192,7 +3212,8 @@ body {
         width: 54px;
         height: 54px;
         font-size: 20px;
-        background: linear-gradient(135deg, #ff6b6b, #e74c3c);
+        background: linear-gradient(135deg, #c0392b, #8e2b2b);
+        box-shadow: 0 8px 20px rgba(120, 30, 30, 0.4);
     }
 
     .swipe-action-info {
@@ -3563,12 +3584,17 @@ body.dark-mode .filter-panel-inner {
 }
 
 .report-reason-select {
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.15);
-    color: rgba(255,255,255,0.75);
-    border-radius: 6px;
-    padding: 4px 8px;
+    background: rgba(97, 58, 103, 0.5);
+    border: 1px solid rgba(194, 123, 255, 0.3);
+    color: rgba(244, 232, 255, 0.88);
+    border-radius: 20px;
+    padding: 6px 12px;
     font-size: 12px;
+    appearance: none;
+    -webkit-appearance: none;
+    cursor: pointer;
+    outline: none;
+    font-family: inherit;
 }
 
 .report-reason-select:disabled {

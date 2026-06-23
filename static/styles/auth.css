@@ -765,12 +765,17 @@ body.dark-mode .intro-text {
     .auth-header {
         padding: 15px;
     }
-    
+
     .logo-img {
         width: 80px;
         height: 90px;
     }
-    
+
+    /* En mobile el formulario va primero, la presentación después */
+    .forms-section {
+        order: -1;
+    }
+
     .presentation-section,
     .forms-section {
         padding: 30px 20px;

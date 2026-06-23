@@ -1,0 +1,37 @@
+{
+  "name": "Stackr",
+  "short_name": "Stackr",
+  "description": "Red para encontrar o crear proyectos colaborativos.",
+  "start_url": "/feed",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#613A67",
+  "theme_color": "#613A67",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/static/imagenes/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/static/imagenes/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/static/imagenes/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/static/imagenes/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

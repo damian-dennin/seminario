@@ -1,5 +1,13 @@
 // Archivo: scripts/projects.js - Versión corregida con gestión de eventos mejorada
 
+function escapeHtml(text) {
+    return String(text ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+}
+
 class ProjectsManager {
     constructor() {
         this.projects = [];
@@ -326,21 +334,21 @@ class ProjectsManager {
         if (rows.length) {
             html += '<div class="collab-detail-grid">';
             rows.forEach(([label, value]) => {
-                html += `<div class="collab-detail-item"><span class="collab-detail-label">${label}</span><span class="collab-detail-value">${value}</span></div>`;
+                html += `<div class="collab-detail-item"><span class="collab-detail-label">${escapeHtml(label)}</span><span class="collab-detail-value">${escapeHtml(value)}</span></div>`;
             });
             html += '</div>';
         }
         if (s.expected_contribution) {
-            html += `<p class="collab-detail-text"><strong>Qué se espera de quien se suma:</strong> ${s.expected_contribution}</p>`;
+            html += `<p class="collab-detail-text"><strong>Qué se espera de quien se suma:</strong> ${escapeHtml(s.expected_contribution)}</p>`;
         }
         if (Array.isArray(s.offered_value) && s.offered_value.length) {
             const valueLabels = { aprendizaje: 'Aprendizaje', portfolio: 'Portfolio', networking: 'Networking', equity: 'Equity', impacto: 'Impacto' };
             html += '<div class="collab-detail-tags">' +
-                s.offered_value.map(v => `<span class="collab-detail-tag">${valueLabels[v] || v}</span>`).join('') +
+                s.offered_value.map(v => `<span class="collab-detail-tag">${escapeHtml(valueLabels[v] || v)}</span>`).join('') +
                 '</div>';
         }
         if (s.organizer_statement) {
-            html += `<p class="collab-detail-text collab-detail-statement"><strong>Por qué se impulsa este proyecto:</strong> ${s.organizer_statement}</p>`;
+            html += `<p class="collab-detail-text collab-detail-statement"><strong>Por qué se impulsa este proyecto:</strong> ${escapeHtml(s.organizer_statement)}</p>`;
         }
 
         container.innerHTML = html || '<p class="collab-detail-empty">Sin información adicional declarada.</p>';
@@ -368,8 +376,8 @@ class ProjectsManager {
             const techItem = document.createElement('div');
             techItem.className = 'tech-item';
             techItem.innerHTML = `
-                <span class="tech-icon-expanded">${tech.icon}</span>
-                <span class="tech-name">${tech.name}</span>
+                <span class="tech-icon-expanded">${escapeHtml(tech.icon)}</span>
+                <span class="tech-name">${escapeHtml(tech.name)}</span>
             `;
             techGrid.appendChild(techItem);
         });
@@ -384,8 +392,8 @@ class ProjectsManager {
             const objectiveItem = document.createElement('div');
             objectiveItem.className = 'objective-item';
             objectiveItem.innerHTML = `
-                <div class="objective-icon">${objective.icon}</div>
-                <span>${objective.text}</span>
+                <div class="objective-icon">${escapeHtml(objective.icon)}</div>
+                <span>${escapeHtml(objective.text)}</span>
             `;
             objectivesList.appendChild(objectiveItem);
         });
@@ -508,7 +516,7 @@ class ProjectsManager {
                 : (data.error || 'No se pudo registrar el interés');
             toast.style.cssText = `
                 position:fixed; bottom:90px; left:50%; transform:translateX(-50%);
-                background:${r.ok ? '#667eea' : '#e74c3c'};
+                background:${r.ok ? 'linear-gradient(135deg,#7c4dcc,#5c2d99)' : 'linear-gradient(135deg,#c0392b,#8e2b2b)'};
                 color:white; padding:12px 24px; border-radius:24px;
                 font-size:0.9rem; z-index:9999;
                 box-shadow:0 4px 16px rgba(0,0,0,0.3);`;

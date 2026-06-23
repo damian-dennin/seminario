@@ -8,6 +8,8 @@
     <meta name="apple-mobile-web-app-title" content="Stackr">
     <meta name="theme-color" content="#613A67">
     <meta name="mobile-web-app-capable" content="yes">
+    <link rel="manifest" href="/static/manifest.json">
+    <link rel="apple-touch-icon" href="/static/imagenes/icon-192.png">
     <link rel="stylesheet" href="/static/styles/style.css">
     <title>Stackr — Candidatos</title>
 </head>
@@ -53,7 +55,7 @@
             </button>
         </div>
         <div class="sidebar-footer">
-            <button class="sidebar-toggle-btn" id="sidebar-toggle" aria-label="Expandir menú">›</button>
+            <button class="sidebar-toggle-btn" id="sidebar-toggle" aria-label="Expandir menú"><svg width="10" height="10" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 1.5L7 5L3 8.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
             <div class="sidebar-theme-meta">
                 <span class="menu-icon theme"></span>
                 <span class="sidebar-footer-label">Tema</span>
@@ -101,10 +103,10 @@
             <div class="candidate-project-tag" style="
                 margin: 8px 16px 0;
                 padding: 6px 12px;
-                background: rgba(102,126,234,0.2);
+                background: rgba(194,123,255,0.18);
                 border-radius: 8px;
                 font-size: 0.8rem;
-                color: #667eea;
+                color: #C27BFF;
                 text-align: center;">
             </div>
         </div>
@@ -114,6 +116,27 @@
         <div class="dislike-indicator">PASAR</div>
         <div class="ampliar-indicator">SWIPE UP · VER MAS</div>
         <div class="like-indicator">MATCH</div>
+    </div>
+
+    <div class="desktop-actions" id="desktop-actions">
+        <button class="action-btn action-dislike" id="btn-dislike" title="Rechazar">
+            <span class="action-icon">✕</span>
+            Rechazar
+        </button>
+        <button class="action-btn action-expand" id="btn-expand" title="Ver más">
+            <span class="action-icon">↑</span>
+            Ver más
+        </button>
+        <button class="action-btn action-like" id="btn-like" title="Hacer match">
+            <span class="action-icon">♥</span>
+            Hacer match
+        </button>
+    </div>
+
+    <div class="mobile-swipe-actions" id="mobile-swipe-actions">
+        <button class="swipe-action-btn swipe-action-pass" id="mobile-action-pass" type="button" aria-label="Rechazar">✕</button>
+        <button class="swipe-action-btn swipe-action-info" id="mobile-action-info" type="button" aria-label="Ver más">i</button>
+        <button class="swipe-action-btn swipe-action-like" id="mobile-action-like" type="button" aria-label="Hacer match">♥</button>
     </div>
 
     <!-- Vista expandida del candidato -->

@@ -1,3 +1,11 @@
+function escapeHtml(text) {
+    return String(text ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     let candidates = [];
     let currentIndex = 0;
@@ -64,39 +72,58 @@ document.addEventListener('DOMContentLoaded', () => {
     settingsPanel.style.cssText = `
         display: none;
         position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        background: var(--card-bg, #1e1e2e);
-        border: 1px solid rgba(255,255,255,0.15);
-        border-radius: 16px;
-        padding: 28px 32px;
+        inset: 0;
+        background: rgba(0,0,0,0.55);
+        backdrop-filter: blur(4px);
         z-index: 9999;
-        min-width: 260px;
-        box-shadow: 0 8px 32px rgba(0,0,0,0.4);
-        text-align: center;
+        align-items: center;
+        justify-content: center;
     `;
     settingsPanel.innerHTML = `
-        <h3 style="margin-bottom:20px;font-size:1.1rem;">Configuración</h3>
-        <button id="settings-logout-btn" style="
-            width:100%; padding:10px; margin-bottom:10px;
-            background: #e74c3c; color:white; border:none;
-            border-radius:8px; cursor:pointer; font-size:0.95rem;">
-            Cerrar sesión
-        </button>
-        <p style="font-size:0.8rem;opacity:0.5;margin-top:12px;">Más opciones — próximamente</p>
-        <button id="settings-close-btn" style="
-            margin-top:8px; background:transparent; border:none;
-            color:inherit; opacity:0.6; cursor:pointer; font-size:0.85rem;">
-            Cancelar
-        </button>
+        <div style="
+            background: linear-gradient(155deg, rgba(58,20,80,0.98), rgba(35,5,58,0.98));
+            border: 1px solid rgba(194,123,255,0.22);
+            border-radius: 22px;
+            padding: 28px 28px 22px;
+            min-width: 260px;
+            max-width: 320px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            text-align: center;
+            color: #f3e8ff;
+        ">
+            <h3 style="margin-bottom:22px;font-size:1.1rem;font-weight:700;letter-spacing:0.02em;">Configuración</h3>
+            <button id="settings-logout-btn" style="
+                width:100%; padding:12px; margin-bottom:12px;
+                background: rgba(200,60,70,0.18);
+                color: #ffb3ba;
+                border: 1px solid rgba(220,80,90,0.4);
+                border-radius:12px; cursor:pointer; font-size:0.95rem;
+                font-weight:600; font-family:inherit;">
+                Cerrar sesión
+            </button>
+            <p style="font-size:0.78rem;color:rgba(244,232,255,0.42);margin-bottom:14px;">Más opciones — próximamente</p>
+            <button id="settings-close-btn" style="
+                background: rgba(255,255,255,0.07);
+                border: 1px solid rgba(255,255,255,0.14);
+                color: rgba(244,232,255,0.7);
+                border-radius:10px;
+                padding: 8px 20px;
+                cursor:pointer; font-size:0.85rem; width:100%; font-family:inherit;">
+                Cancelar
+            </button>
+        </div>
     `;
     document.body.appendChild(settingsPanel);
+
+    settingsPanel.addEventListener('click', (e) => {
+        if (e.target === settingsPanel) settingsPanel.style.display = 'none';
+    });
 
     document.querySelectorAll('.menu-icon.gear').forEach((button) => {
         button.style.cursor = 'pointer';
         button.addEventListener('click', () => {
-            settingsPanel.style.display = 'block';
+            settingsPanel.style.display = 'flex';
         });
     });
 
@@ -188,7 +215,7 @@ document.addEventListener('DOMContentLoaded', () => {
         (user.skills || []).forEach(skill => {
             const item = document.createElement('div');
             item.className = 'tech-item';
-            item.innerHTML = `<span class="tech-icon-expanded">${skill.substring(0,4)}</span><span class="tech-name">${skill}</span>`;
+            item.innerHTML = `<span class="tech-icon-expanded">${escapeHtml(skill.substring(0,4))}</span><span class="tech-name">${escapeHtml(skill)}</span>`;
             skillsGrid.appendChild(item);
         });
 
@@ -201,7 +228,7 @@ document.addEventListener('DOMContentLoaded', () => {
         contacts.forEach(c => {
             const item = document.createElement('div');
             item.className = 'objective-item';
-            item.innerHTML = `<span>${c}</span>`;
+            item.innerHTML = `<span>${escapeHtml(c)}</span>`;
             contactList.appendChild(item);
         });
     }
@@ -308,6 +335,51 @@ document.addEventListener('DOMContentLoaded', () => {
             clearSwipeFeedback();
         }
     }
+
+    function triggerCandidateSwipe(direction) {
+        if (candidates.length === 0 || expandedView) return;
+        card.style.transition = 'transform 0.5s ease';
+
+        if (direction === 'right') {
+            setSwipeFeedback('right', 1);
+            card.style.transform = `translate(${window.innerWidth}px,0) rotate(30deg)`;
+            setTimeout(() => {
+                setPageChromeHidden(false);
+                acceptCandidate();
+            }, 500);
+        } else if (direction === 'left') {
+            setSwipeFeedback('left', 1);
+            card.style.transform = `translate(-${window.innerWidth}px,0) rotate(-30deg)`;
+            setTimeout(() => {
+                setPageChromeHidden(false);
+                rejectCandidate();
+            }, 500);
+        }
+    }
+
+    function openExpandedCandidate() {
+        if (candidates.length === 0 || expandedView) return;
+        setSwipeFeedback('up', 1);
+        card.style.transition = 'transform 0.5s ease';
+        card.style.transform = `translateY(-${window.innerHeight}px)`;
+        setTimeout(() => {
+            expandedCard.classList.remove('hidden');
+            requestAnimationFrame(() => expandedCard.classList.add('visible'));
+            expandedView = true;
+            card.style.transition = 'opacity 0.3s ease';
+            card.style.opacity = '0';
+            card.style.transform = 'translate(0,0)';
+            clearSwipeFeedback();
+            setTimeout(() => { card.style.opacity = '1'; }, 300);
+        }, 500);
+    }
+
+    document.getElementById('btn-dislike')?.addEventListener('click', () => triggerCandidateSwipe('left'));
+    document.getElementById('btn-like')?.addEventListener('click', () => triggerCandidateSwipe('right'));
+    document.getElementById('btn-expand')?.addEventListener('click', openExpandedCandidate);
+    document.getElementById('mobile-action-pass')?.addEventListener('click', () => triggerCandidateSwipe('left'));
+    document.getElementById('mobile-action-like')?.addEventListener('click', () => triggerCandidateSwipe('right'));
+    document.getElementById('mobile-action-info')?.addEventListener('click', openExpandedCandidate);
 
     function handleEnd() {
         if (!isDragging) return;

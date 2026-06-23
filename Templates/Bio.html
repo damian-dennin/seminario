@@ -8,6 +8,8 @@
     <meta name="apple-mobile-web-app-title" content="Stackr">
     <meta name="theme-color" content="#613A67">
     <meta name="mobile-web-app-capable" content="yes">
+    <link rel="manifest" href="/static/manifest.json">
+    <link rel="apple-touch-icon" href="/static/imagenes/icon-192.png">
     <link rel="stylesheet" href="/static/styles/style.css">
     
     <title>Stackr</title>
@@ -55,7 +57,7 @@
             </button>
         </div>
         <div class="sidebar-footer">
-            <button class="sidebar-toggle-btn" id="sidebar-toggle" aria-label="Expandir menú">›</button>
+            <button class="sidebar-toggle-btn" id="sidebar-toggle" aria-label="Expandir menú"><svg width="10" height="10" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 1.5L7 5L3 8.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
             <div class="sidebar-theme-meta">
                 <span class="menu-icon theme"></span>
                 <span class="sidebar-footer-label">Tema</span>
@@ -87,7 +89,7 @@
         <div class="project-card" id="project-card">
             <div class="card-title-row">
                 <img src="/static/imagenes/logoTomberS.png" alt="Logo Tomber Sur" class="logo-img-mini">
-                <h2 class="card-title" style="opacity:0.3;">Cargando...</h2>
+                <h2 class="card-title bio-loading-anim">Cargando...</h2>
             </div>
             <div class="user-card-image" title="Click para cambiar imagen"></div>
             <div class="card-stats">
@@ -96,7 +98,7 @@
                 <span><span class="material-symbols--translate iconos"></span><span class="stats-text">—</span></span>
                 <span><span class="mdi--tools iconos"></span><span class="stats-text">—</span></span>
             </div>
-            <div class="card-description" style="opacity:0.3;">Cargando perfil...</div>
+            <div class="card-description bio-loading-anim">Cargando perfil...</div>
             <div class="card-tech"></div>
         </div>
     </div>

@@ -1,3 +1,11 @@
+function escapeHtml(text) {
+    return String(text ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     const expandedCard = document.getElementById('expanded-card');
     const closeExpanded = document.getElementById('close-expanded');
@@ -63,6 +71,13 @@ function populateUserInterface() {
     const cardTitle = document.querySelector('.card-title');
     if (cardTitle) {
         cardTitle.textContent = `${userData.firstName} ${userData.lastName}`;
+        cardTitle.classList.remove('bio-loading-anim');
+    }
+
+    // Quitar animación de carga en la descripción
+    const cardDesc = document.querySelector('.card-description');
+    if (cardDesc) {
+        cardDesc.classList.remove('bio-loading-anim');
     }
 
     // Foto de perfil o avatar con iniciales
@@ -143,7 +158,7 @@ function populateUserInterface() {
         contacts.forEach(contact => {
             const item = document.createElement('div');
             item.className = 'objective-item';
-            item.innerHTML = `<span>${contact}</span>`;
+            item.innerHTML = `<span>${escapeHtml(contact)}</span>`;
             contactsList.appendChild(item);
         });
     }
@@ -151,7 +166,7 @@ function populateUserInterface() {
     // Actualizar bio en la sección "Sobre Mí"
     const sectionContent = document.querySelector('.section-content');
     if (sectionContent && userData.bio) {
-        sectionContent.innerHTML = userData.bio.replace(/\n/g, '<br>');
+        sectionContent.innerHTML = escapeHtml(userData.bio).replace(/\n/g, '<br>');
     }
 
     // Actualizar habilidades técnicas
@@ -163,9 +178,9 @@ function populateUserInterface() {
             techItem.className = 'tech-item';
             const shortName = skill.substring(0, 4);
             techItem.innerHTML = `
-                <span class="tech-icon-expanded">${shortName}</span>
+                <span class="tech-icon-expanded">${escapeHtml(shortName)}</span>
                 <div class="tech-details">
-                    <span class="tech-name">${skill}</span>
+                    <span class="tech-name">${escapeHtml(skill)}</span>
                     <span class="tech-level">Intermedio</span>
                 </div>
             `;
@@ -192,7 +207,7 @@ function populateUserInterface() {
         userData.objectives.forEach(obj => {
             const item = document.createElement('div');
             item.className = 'objective-item';
-            item.innerHTML = `<span>${obj}</span>`;
+            item.innerHTML = `<span>${escapeHtml(obj)}</span>`;
             objectivesListEl.appendChild(item);
         });
     }
@@ -204,7 +219,7 @@ function populateUserInterface() {
         userData.certifications.forEach(cert => {
             const item = document.createElement('div');
             item.className = 'objective-item';
-            item.innerHTML = `<span>${cert}</span>`;
+            item.innerHTML = `<span>${escapeHtml(cert)}</span>`;
             certificationsList.appendChild(item);
         });
     }
@@ -262,11 +277,11 @@ async function loadUserProjects() {
 
             card.innerHTML = `
                 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-                    <strong style="font-size:0.95rem;">${project.title}</strong>
+                    <strong style="font-size:0.95rem;">${escapeHtml(project.title)}</strong>
                     ${candidateBadge}
                 </div>
                 <div style="font-size:0.8rem;opacity:0.6;margin-bottom:8px;">
-                    ${project.stats?.type || ''} · ${project.stats?.language || ''} · ${project.stats?.duration || ''}
+                    ${escapeHtml(project.stats?.type || '')} · ${escapeHtml(project.stats?.language || '')} · ${escapeHtml(project.stats?.duration || '')}
                 </div>
                 <div style="background:rgba(255,255,255,0.1);border-radius:4px;height:6px;overflow:hidden;">
                     <div style="background:linear-gradient(90deg,#667eea,#764ba2);height:100%;width:${project.progress || 0}%;transition:width 0.5s;"></div>
@@ -460,12 +475,16 @@ async function saveChangesToDatabase() {
             populateUserInterface();
             showSuccessMessage('Perfil actualizado exitosamente');
         } else {
-            console.error('Error al actualizar el perfil');
-            showErrorMessage('Error al actualizar el perfil');
+            const errData = await response.json().catch(() => ({}));
+            console.error('Error al actualizar el perfil', errData);
+            showErrorMessage(errData.error || 'Error al actualizar el perfil');
+            // Restaurar UI con los datos anteriores para no dejar estado inconsistente
+            populateUserInterface();
         }
     } catch (error) {
         console.error('Error de conexión:', error);
         showErrorMessage('Error de conexión al servidor');
+        populateUserInterface();
     }
 }
 
@@ -625,12 +644,12 @@ function showErrorMessage(message) {
         
         if (isEditMode) {
             editBtn.textContent = 'Guardar';
-            editBtn.style.background = 'linear-gradient(135deg, #4CAF50 0%, #45a049 100%)';
+            editBtn.style.background = 'linear-gradient(135deg, #7c4dcc 0%, #5c2d99 100%)';
             expandedCard.classList.add('edit-mode');
             makeEditable();
         } else {
             editBtn.textContent = 'Editar';
-            editBtn.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+            editBtn.style.background = 'linear-gradient(135deg, #C27BFF 0%, #613A67 100%)';
             expandedCard.classList.remove('edit-mode');
             saveChanges();
             makeReadOnly();
@@ -743,11 +762,14 @@ function makeEditable() {
             font-size: 0.85rem;
             cursor: pointer;
         `;
+        const currentStatus = (typeof userData !== 'undefined' && userData?.status)
+            ? userData.status
+            : statusBadge.textContent.trim();
         ['Disponible', 'No disponible', 'Ocupado'].forEach(opt => {
             const option = document.createElement('option');
             option.value = opt;
             option.textContent = opt;
-            if (opt === statusBadge.textContent.trim()) option.selected = true;
+            if (opt === currentStatus) option.selected = true;
             statusSelect.appendChild(option);
         });
         statusBadge.replaceWith(statusSelect);
@@ -1304,39 +1326,54 @@ function makeReadOnly() {
     settingsPanel.style.cssText = `
         display: none;
         position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        background: var(--card-bg, #1e1e2e);
-        border: 1px solid rgba(255,255,255,0.15);
-        border-radius: 16px;
-        padding: 28px 32px;
+        inset: 0;
+        background: rgba(0,0,0,0.55);
+        backdrop-filter: blur(4px);
         z-index: 9999;
-        min-width: 260px;
-        box-shadow: 0 8px 32px rgba(0,0,0,0.4);
-        text-align: center;
+        align-items: center;
+        justify-content: center;
     `;
     settingsPanel.innerHTML = `
-        <h3 style="margin-bottom:20px;font-size:1.1rem;">Configuración</h3>
-        <button id="settings-logout-btn" style="
-            width:100%; padding:10px; margin-bottom:10px;
-            background: #e74c3c; color:white; border:none;
-            border-radius:8px; cursor:pointer; font-size:0.95rem;">
-            Cerrar sesión
-        </button>
-        <p style="font-size:0.8rem;opacity:0.5;margin-top:12px;">Más opciones — próximamente</p>
-        <button id="settings-close-btn" style="
-            margin-top:8px; background:transparent; border:none;
-            color:inherit; opacity:0.6; cursor:pointer; font-size:0.85rem;">
-            Cancelar
-        </button>
+        <div style="
+            background: linear-gradient(155deg, rgba(58,20,80,0.98), rgba(35,5,58,0.98));
+            border: 1px solid rgba(194,123,255,0.22);
+            border-radius: 22px;
+            padding: 28px 28px 22px;
+            min-width: 260px; max-width: 320px; width: 90%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            text-align: center; color: #f3e8ff;">
+            <h3 style="margin-bottom:22px;font-size:1.1rem;font-weight:700;letter-spacing:0.02em;">Configuración</h3>
+            <button id="settings-logout-btn" style="
+                width:100%; padding:12px; margin-bottom:12px;
+                background: rgba(200,60,70,0.18);
+                color: #ffb3ba;
+                border: 1px solid rgba(220,80,90,0.4);
+                border-radius:12px; cursor:pointer; font-size:0.95rem;
+                font-weight:600; font-family:inherit;">
+                Cerrar sesión
+            </button>
+            <p style="font-size:0.78rem;color:rgba(244,232,255,0.42);margin-bottom:14px;">Más opciones — próximamente</p>
+            <button id="settings-close-btn" style="
+                background: rgba(255,255,255,0.07);
+                border: 1px solid rgba(255,255,255,0.14);
+                color: rgba(244,232,255,0.7);
+                border-radius:10px;
+                padding: 8px 20px;
+                cursor:pointer; font-size:0.85rem; width:100%; font-family:inherit;">
+                Cancelar
+            </button>
+        </div>
     `;
     document.body.appendChild(settingsPanel);
+
+    settingsPanel.addEventListener('click', (e) => {
+        if (e.target === settingsPanel) settingsPanel.style.display = 'none';
+    });
 
     document.querySelectorAll('.menu-icon.gear').forEach(btn => {
         btn.style.cursor = 'pointer';
         btn.addEventListener('click', () => {
-            settingsPanel.style.display = 'block';
+            settingsPanel.style.display = 'flex';
         });
     });
 

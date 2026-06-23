@@ -8,6 +8,8 @@
     <meta name="apple-mobile-web-app-title" content="Stackr">
     <meta name="theme-color" content="#613A67">
     <meta name="mobile-web-app-capable" content="yes">
+    <link rel="manifest" href="/static/manifest.json">
+    <link rel="apple-touch-icon" href="/static/imagenes/icon-192.png">
     <link rel="stylesheet" href="/static/styles/style.css">
     <title>Stackr — Mis postulaciones</title>
     <style>
@@ -27,29 +29,35 @@
         .applications-hero {
             display: grid;
             gap: 10px;
-            color: #fff;
+            color: #2d0a3f;
         }
 
         .applications-kicker {
             font-size: 12px;
             letter-spacing: 0.16em;
             text-transform: uppercase;
-            color: rgba(255, 255, 255, 0.6);
+            color: rgba(80, 30, 100, 0.7);
         }
 
         .applications-title {
             font-size: clamp(30px, 4vw, 46px);
             line-height: 1.05;
             margin: 0;
+            color: #2d0a3f;
         }
 
         .applications-description {
             margin: 0;
             font-size: 15px;
             line-height: 1.6;
-            color: rgba(244, 232, 255, 0.8);
+            color: rgba(60, 20, 85, 0.75);
             max-width: 620px;
         }
+
+        body.dark-mode .applications-hero { color: #fff; }
+        body.dark-mode .applications-kicker { color: rgba(255,255,255,0.6); }
+        body.dark-mode .applications-title { color: #fff; }
+        body.dark-mode .applications-description { color: rgba(244,232,255,0.8); }
 
         .applications-grid {
             display: grid;
@@ -257,7 +265,7 @@
             </button>
         </div>
         <div class="sidebar-footer">
-            <button class="sidebar-toggle-btn" id="sidebar-toggle" aria-label="Expandir menú">›</button>
+            <button class="sidebar-toggle-btn" id="sidebar-toggle" aria-label="Expandir menú"><svg width="10" height="10" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 1.5L7 5L3 8.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
             <div class="sidebar-theme-meta">
                 <span class="menu-icon theme"></span>
                 <span class="sidebar-footer-label">Tema</span>
