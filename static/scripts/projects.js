@@ -342,7 +342,7 @@ class ProjectsManager {
             html += `<p class="collab-detail-text"><strong>Qué se espera de quien se suma:</strong> ${escapeHtml(s.expected_contribution)}</p>`;
         }
         if (Array.isArray(s.offered_value) && s.offered_value.length) {
-            const valueLabels = { aprendizaje: 'Aprendizaje', portfolio: 'Portfolio', networking: 'Networking', equity: 'Equity', impacto: 'Impacto' };
+            const valueLabels = { aprendizaje: 'Aprendizaje', portfolio: 'Portfolio', networking: 'Networking', impacto: 'Impacto' };
             html += '<div class="collab-detail-tags">' +
                 s.offered_value.map(v => `<span class="collab-detail-tag">${escapeHtml(valueLabels[v] || v)}</span>`).join('') +
                 '</div>';
