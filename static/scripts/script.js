@@ -309,7 +309,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 language: document.getElementById('language').value,
                 type: document.getElementById('project-type').value,
                 org_type: document.getElementById('org-type')?.value || '',
-                project_nature: document.getElementById('project-nature')?.value || '',
                 project_stage: document.getElementById('project-stage')?.value || '',
                 collaboration_mode: document.getElementById('collaboration-mode')?.value || '',
                 weekly_commitment_hours: document.getElementById('weekly-commitment')?.value || '',

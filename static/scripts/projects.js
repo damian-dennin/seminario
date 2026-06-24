@@ -310,11 +310,6 @@ class ProjectsManager {
         const s = stats || {};
 
         const labels = {
-            project_nature: {
-                open_source: 'Open Source', portfolio: 'Portfolio', mvp: 'MVP',
-                startup: 'Startup', hackathon: 'Hackathon', research: 'Investigación',
-                impacto_social: 'Impacto Social'
-            },
             project_stage: {
                 idea: 'Idea', prototipo: 'Prototipo', mvp: 'MVP',
                 validacion: 'Validación', en_curso: 'En Curso'
@@ -325,7 +320,6 @@ class ProjectsManager {
         };
 
         const rows = [];
-        if (s.project_nature) rows.push(['Naturaleza', labels.project_nature[s.project_nature] || s.project_nature]);
         if (s.project_stage) rows.push(['Etapa', labels.project_stage[s.project_stage] || s.project_stage]);
         if (s.collaboration_mode) rows.push(['Modo de colaboración', labels.collaboration_mode[s.collaboration_mode] || s.collaboration_mode]);
         if (s.weekly_commitment_hours) rows.push(['Dedicación semanal', s.weekly_commitment_hours]);
