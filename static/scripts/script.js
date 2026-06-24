@@ -929,7 +929,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('btn-like')?.addEventListener('click', () => triggerSwipe('right'));
     document.getElementById('btn-expand')?.addEventListener('click', () => triggerSwipe('up'));
 
-    // ── Notificaciones de match en tiempo real ────────────────
+    // ── Notificaciones de match e interés en tiempo real ─────
     async function initMatchNotifications() {
         if (!window.supabase?.createClient) return;
         try {
@@ -939,22 +939,72 @@ document.addEventListener('DOMContentLoaded', () => {
             const sb = window.supabase.createClient(config.supabaseUrl, config.supabaseKey);
             const userId = config.currentUserId;
 
+            // Canal 1: nuevo match → badge en Chats + overlay
             sb.channel('match-notifications')
                 .on(
                     'postgres_changes',
                     { event: 'INSERT', schema: 'public', table: 'matches' },
                     (payload) => {
                         const match = payload.new;
-                        // Solo notificar si el match involucra al usuario actual
                         if (match.user_id !== userId && match.owner_id !== userId) return;
-
                         showMatchNotification();
                     }
                 )
                 .subscribe();
+
+            // Canal 2: nuevo interés → badge en Candidatos si es en un proyecto propio
+            const myProjectsRes = await fetch('/api/user/projects');
+            const myProjects = myProjectsRes.ok ? await myProjectsRes.json() : [];
+            const myProjectIds = new Set((myProjects || []).map(p => p.id));
+
+            sb.channel('interest-notifications')
+                .on(
+                    'postgres_changes',
+                    { event: 'INSERT', schema: 'public', table: 'interests' },
+                    (payload) => {
+                        const interest = payload.new;
+                        if (!myProjectIds.has(interest.project_id)) return;
+                        showInterestNotification();
+                    }
+                )
+                .subscribe();
+
         } catch (e) {
-            console.warn('No se pudieron iniciar las notificaciones de match:', e);
+            console.warn('No se pudieron iniciar las notificaciones:', e);
         }
+    }
+
+    function showInterestNotification() {
+        // Badge en el link de Candidatos del sidebar
+        const candidateLinks = document.querySelectorAll('a[href*="candidates"]');
+        candidateLinks.forEach(link => {
+            if (!link.querySelector('.notif-badge-interest')) {
+                const badge = document.createElement('span');
+                badge.className = 'notif-badge-interest';
+                badge.style.cssText = `
+                    display:inline-block; width:9px; height:9px;
+                    background:#C27BFF; border-radius:50%;
+                    margin-left:5px; vertical-align:middle;
+                    box-shadow:0 0 6px rgba(194,123,255,0.8);
+                    animation:notifPulse 1.4s ease-in-out infinite;
+                `;
+                link.appendChild(badge);
+            }
+        });
+
+        // Toast sutil
+        const toast = document.createElement('div');
+        toast.textContent = '¡Alguien se interesó en tu proyecto!';
+        toast.style.cssText = `
+            position:fixed; bottom:90px; left:50%; transform:translateX(-50%);
+            background:linear-gradient(135deg,#7c4dcc,#5c2d99);
+            color:#f3e8ff; padding:10px 20px; border-radius:20px;
+            font-size:14px; font-weight:600; z-index:9999;
+            box-shadow:0 8px 24px rgba(0,0,0,0.4);
+            animation:fadeInUp 0.3s ease;
+        `;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 4000);
     }
 
     function showMatchNotification() {

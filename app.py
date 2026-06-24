@@ -384,8 +384,16 @@ def search_projects():
     def not_own(p):
         return p.get('creator_id') != session['user_id']
 
+    # Proyectos en los que el usuario ya mostró interés (swipe right o match)
+    already_seen = sb_get('interests', {'user_id': f'eq.{session["user_id"]}', 'select': 'project_id'})
+    seen_ids = {i['project_id'] for i in already_seen}
+
+    def not_already_seen(p):
+        return p['id'] not in seen_ids
+
     filtered = [p for p in all_projects
-                if matches_text(p) and matches_duration(p) and matches_org_type(p) and not_hidden(p) and not_own(p)]
+                if matches_text(p) and matches_duration(p) and matches_org_type(p)
+                and not_hidden(p) and not_own(p) and not_already_seen(p)]
 
     return jsonify(filtered)
 
