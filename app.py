@@ -381,8 +381,11 @@ def search_projects():
     def not_hidden(p):
         return p.get('moderation_status') not in ('flagged', 'hidden')
 
+    def not_own(p):
+        return p.get('creator_id') != session['user_id']
+
     filtered = [p for p in all_projects
-                if matches_text(p) and matches_duration(p) and matches_org_type(p) and not_hidden(p)]
+                if matches_text(p) and matches_duration(p) and matches_org_type(p) and not_hidden(p) and not_own(p)]
 
     return jsonify(filtered)
 
