@@ -3401,9 +3401,34 @@ body.dark-mode .filter-panel-inner {
         display: none;
     }
 
+    /* Botón de filtros desktop */
+    .desktop-filter-btn {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        position: fixed;
+        top: 20px;
+        right: 24px;
+        z-index: 200;
+        background: rgba(97, 58, 103, 0.55);
+        border: 1.5px solid rgba(194, 123, 255, 0.35);
+        color: rgba(244, 232, 255, 0.9);
+        border-radius: 20px;
+        padding: 7px 14px 7px 12px;
+        cursor: pointer;
+        font-size: 13px;
+        backdrop-filter: blur(8px);
+        transition: background 0.2s ease, border-color 0.2s ease;
+    }
+
+    .desktop-filter-btn:hover {
+        background: rgba(124, 77, 204, 0.55);
+        border-color: rgba(194, 123, 255, 0.6);
+    }
+
     .filter-panel {
         position: fixed;
-        top: 80px;
+        top: 64px;
         left: auto;
         right: 20px;
         bottom: auto;
@@ -3426,6 +3451,13 @@ body.dark-mode .filter-panel-inner {
         border: 1px solid rgba(194,123,255,0.2);
         padding: 20px;
         box-shadow: 0 16px 40px rgba(0,0,0,0.4);
+    }
+}
+
+/* Ocultar botón desktop en mobile */
+@media (max-width: 768px) {
+    .desktop-filter-btn {
+        display: none;
     }
 }
 

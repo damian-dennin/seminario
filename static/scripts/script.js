@@ -849,12 +849,13 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // ── Panel de filtros ──────────────────────────────────────
-    const filterToggleBtn  = document.getElementById('filter-toggle-btn');
-    const filterPanel      = document.getElementById('filter-panel');
-    const filterOverlay    = document.getElementById('filter-overlay');
-    const filterPanelClose = document.getElementById('filter-panel-close');
-    const filterApplyBtn   = document.getElementById('filter-apply-btn');
-    const filterActiveDot  = document.getElementById('filter-active-dot');
+    const filterToggleBtn         = document.getElementById('filter-toggle-btn');
+    const filterToggleBtnDesktop  = document.getElementById('filter-toggle-btn-desktop');
+    const filterPanel             = document.getElementById('filter-panel');
+    const filterOverlay           = document.getElementById('filter-overlay');
+    const filterPanelClose        = document.getElementById('filter-panel-close');
+    const filterApplyBtn          = document.getElementById('filter-apply-btn');
+    const filterActiveDot         = document.getElementById('filter-active-dot');
 
     let activeFilters = { duration: '', org_type: '' };
 
@@ -897,6 +898,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelector('#filter-org-type .filter-chip')?.classList.add('active');
 
     filterToggleBtn?.addEventListener('click', openFilterPanel);
+    filterToggleBtnDesktop?.addEventListener('click', openFilterPanel);
     filterOverlay?.addEventListener('click', closeFilterPanel);
     filterPanelClose?.addEventListener('click', closeFilterPanel);
 

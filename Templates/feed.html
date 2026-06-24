@@ -18,6 +18,15 @@
     <div class="logo-container">
         <img src="/static/imagenes/logoTomberS.png" alt="Logo Tomber Sur" class="logo-img">
     </div>
+
+    <!-- Botón de filtros desktop (fijo, top-right) -->
+    <button class="desktop-filter-btn" id="filter-toggle-btn-desktop" type="button" aria-label="Filtros">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/>
+        </svg>
+        <span style="font-size:13px; font-weight:600;">Filtros</span>
+        <span class="filter-active-dot" id="filter-active-dot-desktop"></span>
+    </button>
     
     <div class="sidebar" id="sidebar">
         <div class="sidebar-brand">
@@ -109,9 +118,9 @@
                 <div class="filter-chips" id="filter-org-type">
                     <button class="filter-chip" data-value="">Todas</button>
                     <button class="filter-chip" data-value="académico">Académico</button>
-                    <button class="filter-chip" data-value="startup">Startup</button>
-                    <button class="filter-chip" data-value="freelance">Freelance</button>
-                    <button class="filter-chip" data-value="empresa">Empresa</button>
+                    <button class="filter-chip" data-value="open_source">Open Source</button>
+                    <button class="filter-chip" data-value="investigación">Investigación</button>
+                    <button class="filter-chip" data-value="ong">ONG</button>
                     <button class="filter-chip" data-value="personal">Personal</button>
                 </div>
             </div>
@@ -468,10 +477,10 @@
                     <select id="org-type">
                         <option value="">Sin especificar</option>
                         <option value="Académico">Académico</option>
-                        <option value="Startup">Startup</option>
-                        <option value="Freelance">Freelance</option>
-                        <option value="Empresa">Empresa</option>
-                        <option value="Personal">Personal</option>
+                        <option value="open_source">Open Source</option>
+                        <option value="investigación">Investigación</option>
+                        <option value="ong">ONG</option>
+                        <option value="personal">Personal</option>
                     </select>
                 </div>
                 <div class="form-group">
