@@ -3697,3 +3697,157 @@ body.dark-mode .filter-panel-inner {
     font-style: italic;
     margin: 0;
 }
+
+/* ============================================================
+   MODAL: Editar proyecto propio (Bio.html)
+   ============================================================ */
+
+.edit-project-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.65);
+    backdrop-filter: blur(6px);
+    z-index: 99999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.edit-project-overlay.hidden {
+    display: none;
+}
+
+.edit-project-modal {
+    background: linear-gradient(160deg, #1e0a2e 0%, #2a1040 100%);
+    border: 1px solid rgba(194,123,255,0.25);
+    border-radius: 20px;
+    width: 100%;
+    max-width: 520px;
+    max-height: 88vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 24px 60px rgba(0,0,0,0.6);
+    animation: fadeInUp 0.25s ease;
+}
+
+.edit-project-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 22px 14px;
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+}
+
+.edit-project-header h3 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #e8d0ff;
+}
+
+.edit-project-close {
+    background: none;
+    border: none;
+    color: rgba(255,255,255,0.5);
+    font-size: 1.4rem;
+    cursor: pointer;
+    padding: 0 4px;
+    line-height: 1;
+}
+.edit-project-close:hover { color: #fff; }
+
+.edit-project-body {
+    overflow-y: auto;
+    padding: 18px 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex: 1;
+}
+
+.ep-label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: rgba(200,160,255,0.85);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-top: 8px;
+}
+
+.ep-hint {
+    font-weight: 400;
+    text-transform: none;
+    letter-spacing: 0;
+    opacity: 0.6;
+}
+
+.ep-input {
+    width: 100%;
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(194,123,255,0.2);
+    border-radius: 10px;
+    color: #f0e0ff;
+    padding: 9px 12px;
+    font-size: 0.88rem;
+    outline: none;
+    box-sizing: border-box;
+    font-family: inherit;
+    transition: border-color 0.2s;
+}
+.ep-input:focus { border-color: rgba(194,123,255,0.55); }
+.ep-input::placeholder { color: rgba(255,255,255,0.25); }
+
+.ep-textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+.ep-textarea-sm { min-height: 60px; }
+
+select.ep-input { cursor: pointer; }
+select.ep-input option { background: #1e0a2e; }
+
+.ep-row {
+    display: flex;
+    gap: 12px;
+}
+.ep-col { flex: 1; display: flex; flex-direction: column; gap: 6px; }
+
+.edit-project-footer {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    padding: 14px 22px 18px;
+    border-top: 1px solid rgba(255,255,255,0.07);
+}
+
+.ep-btn-cancel {
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.15);
+    color: rgba(255,255,255,0.65);
+    border-radius: 10px;
+    padding: 8px 18px;
+    font-size: 0.88rem;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.ep-btn-cancel:hover { background: rgba(255,255,255,0.12); }
+
+.ep-btn-save {
+    background: linear-gradient(135deg, #7c3aed, #9f67e8);
+    border: none;
+    color: white;
+    border-radius: 10px;
+    padding: 8px 22px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+.ep-btn-save:hover { opacity: 0.9; }
+.ep-btn-save:disabled { opacity: 0.5; cursor: not-allowed; }
+
+@media (max-width: 480px) {
+    .ep-row { flex-direction: column; }
+    .edit-project-modal { border-radius: 16px; }
+}

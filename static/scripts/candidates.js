@@ -146,19 +146,30 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function showEmpty() {
-        document.querySelector('.card-container').innerHTML = `
-            <div class="no-projects-message">
-                <div class="no-projects-icon">👥</div>
-                <h2>Sin candidatos por ahora</h2>
-                <p>Cuando alguien muestre interés en tus proyectos, aparecerá aquí.</p>
-            </div>`;
+    function showEmpty(allReviewed = false) {
+        document.querySelector('.card-container').innerHTML = allReviewed
+            ? `<div class="no-projects-message">
+                   <div class="no-projects-icon">✅</div>
+                   <h2>Ya revisaste todos</h2>
+                   <p>Atendiste todos los candidatos disponibles. Volvé más tarde para ver nuevos interesados.</p>
+                   <button onclick="location.reload()" style="
+                       margin-top:16px; padding:9px 20px; border-radius:10px;
+                       background:linear-gradient(135deg,#7c3aed,#9f67e8);
+                       border:none; color:white; font-size:0.88rem; cursor:pointer;">
+                       Actualizar
+                   </button>
+               </div>`
+            : `<div class="no-projects-message">
+                   <div class="no-projects-icon">👥</div>
+                   <h2>Sin candidatos por ahora</h2>
+                   <p>Cuando alguien muestre interés en tus proyectos, aparecerá aquí.</p>
+               </div>`;
         statusIndicators.style.display = 'none';
     }
 
     function renderCandidate(index) {
         if (index >= candidates.length) {
-            showEmpty();
+            showEmpty(candidates.length > 0); // si había candidatos = "ya revisaste todos"
             return;
         }
         const { user, project } = candidates[index];

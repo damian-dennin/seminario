@@ -93,18 +93,16 @@ class ProjectsManager {
         if (cardContainer) {
             cardContainer.innerHTML = `
                 <div class="no-projects-message">
-                    <div class="no-projects-icon">📋</div>
-                    <h2>No hay proyectos disponibles</h2>
-                    <p>No se han encontrado proyectos en la base de datos.</p>
-                    <p>¡Sé el primero en crear un proyecto!</p>
+                    <div class="no-projects-icon">🔭</div>
+                    <h2>Todavía no hay proyectos</h2>
+                    <p>Aún no se publicó ningún proyecto colaborativo.</p>
+                    <p>¡Podés ser el primero en crear uno!</p>
                 </div>
             `;
         }
-        
         const statusIndicators = document.getElementById('status-indicators');
-        if (statusIndicators) {
-            statusIndicators.style.display = 'none';
-        }
+        if (statusIndicators) statusIndicators.style.display = 'none';
+        this._hideActions();
     }
 
     showAllProjectsViewedMessage() {
@@ -112,21 +110,26 @@ class ProjectsManager {
         if (cardContainer) {
             cardContainer.innerHTML = `
                 <div class="all-projects-viewed-message">
-                    <div class="all-projects-icon">🎉</div>
-                    <h2>¡Has visto todos los proyectos!</h2>
-                    <p>Ya has revisado todos los ${this.projects.length} proyectos disponibles.</p>
-                    <p>¿Quieres verlos nuevamente?</p>
+                    <div class="all-projects-icon">✦</div>
+                    <h2>Ya viste todo por ahora</h2>
+                    <p>Revisaste los ${this.projects.length} proyectos disponibles.</p>
+                    <p>Volvé más tarde para ver novedades, o repasá los que ya viste.</p>
                     <button class="restart-button" onclick="window.projectsManager.restartProjects()">
-                        Ver proyectos otra vez
+                        Ver de nuevo
                     </button>
                 </div>
             `;
         }
-        
         const statusIndicators = document.getElementById('status-indicators');
-        if (statusIndicators) {
-            statusIndicators.style.display = 'none';
-        }
+        if (statusIndicators) statusIndicators.style.display = 'none';
+        this._hideActions();
+    }
+
+    _hideActions() {
+        document.getElementById('desktop-actions')?.style.setProperty('display', 'none');
+        document.getElementById('mobile-swipe-actions')?.style.setProperty('display', 'none');
+        document.querySelectorAll('.kbd-hint').forEach(el => el.style.display = 'none');
+        document.querySelectorAll('.card-stack').forEach(el => el.style.display = 'none');
     }
 
     restartProjects() {
@@ -421,12 +424,14 @@ class ProjectsManager {
 
     nextProject() {
         if (this.projects.length === 0) return;
-        
+
         const currentProject = this.projects[this.currentProjectIndex];
         if (currentProject) {
+            this._lastSkippedId    = currentProject.id;
+            this._lastSkippedIndex = this.currentProjectIndex;
             this.markProjectAsViewed(currentProject.id);
         }
-        
+
         this.renderCurrentProject();
         
         const unviewedCount = this.getUnviewedProjects().length;
@@ -435,12 +440,25 @@ class ProjectsManager {
 
     previousProject() {
         if (this.projects.length === 0) return;
-        
+
         this.currentProjectIndex = (this.currentProjectIndex - 1 + this.projects.length) % this.projects.length;
         const project = this.projects[this.currentProjectIndex];
         this.updateProjectCard(project);
         this.updateExpandedCard(project);
         console.log(`Mostrando proyecto ${this.currentProjectIndex + 1} de ${this.projects.length}`);
+    }
+
+    undoLastSkip() {
+        if (this._lastSkippedId === undefined || this._lastSkippedId === null) return false;
+        const idx = this.projects.findIndex(p => p.id === this._lastSkippedId);
+        if (idx === -1) return false;
+        this.viewedProjects.delete(this._lastSkippedId);
+        this.saveViewedProjects();
+        this.currentProjectIndex = idx;
+        this._lastSkippedId    = null;
+        this._lastSkippedIndex = null;
+        this.renderCurrentProject();
+        return true;
     }
 
     getRandomProject() {

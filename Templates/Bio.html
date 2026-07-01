@@ -212,6 +212,67 @@
     </div>
 
 
+    <!-- Modal: Editar proyecto -->
+    <div id="edit-project-modal" class="edit-project-overlay hidden">
+        <div class="edit-project-modal">
+            <div class="edit-project-header">
+                <h3>Editar proyecto</h3>
+                <button onclick="closeEditProjectModal()" class="edit-project-close">×</button>
+            </div>
+            <div class="edit-project-body">
+                <input type="hidden" id="ep-id">
+
+                <label class="ep-label">Título</label>
+                <input type="text" id="ep-title" class="ep-input" placeholder="Nombre del proyecto">
+
+                <label class="ep-label">Descripción</label>
+                <textarea id="ep-description" class="ep-input ep-textarea" placeholder="¿De qué se trata?"></textarea>
+
+                <label class="ep-label">Tecnologías <span class="ep-hint">(separadas por coma)</span></label>
+                <input type="text" id="ep-technologies" class="ep-input" placeholder="Python, React, Docker…">
+
+                <label class="ep-label">Habilidades buscadas <span class="ep-hint">(separadas por coma)</span></label>
+                <input type="text" id="ep-skills" class="ep-input" placeholder="Frontend, DevOps…">
+
+                <label class="ep-label">Objetivos <span class="ep-hint">(uno por línea)</span></label>
+                <textarea id="ep-objectives" class="ep-input ep-textarea ep-textarea-sm" placeholder="Lanzar MVP&#10;Conseguir 100 usuarios"></textarea>
+
+                <div class="ep-row">
+                    <div class="ep-col">
+                        <label class="ep-label">Tamaño del equipo</label>
+                        <input type="text" id="ep-team" class="ep-input" placeholder="2-4 personas">
+                    </div>
+                    <div class="ep-col">
+                        <label class="ep-label">Duración</label>
+                        <input type="text" id="ep-duration" class="ep-input" placeholder="3 meses">
+                    </div>
+                </div>
+
+                <div class="ep-row">
+                    <div class="ep-col">
+                        <label class="ep-label">Idioma</label>
+                        <input type="text" id="ep-language" class="ep-input" placeholder="Español">
+                    </div>
+                    <div class="ep-col">
+                        <label class="ep-label">Tipo de organización</label>
+                        <select id="ep-org" class="ep-input">
+                            <option value="">— Seleccioná —</option>
+                            <option value="académico">Académico</option>
+                            <option value="open_source">Open Source</option>
+                            <option value="investigación">Investigación</option>
+                            <option value="ong">ONG</option>
+                            <option value="personal">Personal</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="edit-project-footer">
+                <button onclick="closeEditProjectModal()" class="ep-btn-cancel">Cancelar</button>
+                <button onclick="saveEditProject()" class="ep-btn-save" id="ep-save-btn">Guardar</button>
+            </div>
+        </div>
+    </div>
+
     <script src="/static/scripts/sidebar.js"></script>
     <script src="/static/scripts/userscript.js"></script>
 </body>

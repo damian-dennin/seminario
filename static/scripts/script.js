@@ -771,6 +771,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 resetCard();
                 handleSwipe('left');
                 setFeedChromeHidden(false);
+                showUndoSkipToast();
             }, 500);
         } else if (direction === 'up') {
             setSwipeFeedback('up', 1);
@@ -805,6 +806,50 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 
+
+    // ── Undo de swipe izquierdo ───────────────────────────────
+    let undoToastTimer = null;
+
+    function showUndoSkipToast() {
+        // Cancelar toast anterior si existe
+        const prev = document.getElementById('undo-skip-toast');
+        if (prev) { prev.remove(); clearTimeout(undoToastTimer); }
+
+        const isMobile = window.innerWidth <= 768;
+        const toast = document.createElement('div');
+        toast.id = 'undo-skip-toast';
+        toast.style.cssText = `
+            position: fixed; bottom: ${isMobile ? '100px' : '30px'};
+            left: 50%; transform: translateX(-50%);
+            background: rgba(40,20,60,0.96); border: 1px solid rgba(194,123,255,0.35);
+            color: #e8d0ff; padding: 10px 18px;
+            border-radius: 24px; font-size: 0.88rem; z-index: 9999;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+            display: flex; align-items: center; gap: 12px;
+            animation: fadeInUp 0.25s ease;
+            white-space: nowrap;
+        `;
+        toast.innerHTML = `
+            <span style="opacity:0.75;">Proyecto pasado</span>
+            <button id="undo-skip-btn" style="
+                background: rgba(194,123,255,0.2); border: 1px solid rgba(194,123,255,0.4);
+                color: #c27bff; border-radius: 14px; padding: 4px 12px;
+                font-size: 0.82rem; font-weight: 600; cursor: pointer;">
+                Deshacer
+            </button>
+        `;
+        document.body.appendChild(toast);
+
+        document.getElementById('undo-skip-btn').addEventListener('click', () => {
+            clearTimeout(undoToastTimer);
+            toast.remove();
+            if (window.projectsManager?.undoLastSkip()) {
+                showMatchToast('↩ Proyecto restaurado');
+            }
+        });
+
+        undoToastTimer = setTimeout(() => toast.remove(), 3500);
+    }
 
     // ── Reporte anti-trabajo-encubierto ───────────────────────
     const reportBtn = document.getElementById('report-btn');
@@ -912,14 +957,51 @@ document.addEventListener('DOMContentLoaded', () => {
     fetch('/api/user/projects')
         .then((response) => response.json())
         .then((projects) => {
-            if (Array.isArray(projects) && projects.length > 0) {
+            if (!Array.isArray(projects)) return;
+
+            if (projects.length > 0) {
                 const button = document.getElementById('candidates-btn');
-                if (button) {
-                    button.style.display = 'flex';
-                }
+                if (button) button.style.display = 'flex';
             }
+
+            // Proyectos dados de baja por moderación → aviso al creador
+            const flagged = projects.filter(p => p.moderation_status === 'flagged');
+            flagged.forEach(p => showProjectFlaggedWarning(p));
         })
         .catch(() => {});
+
+    function showProjectFlaggedWarning(project) {
+        const existing = document.getElementById(`flagged-banner-${project.id}`);
+        if (existing) return;
+
+        const banner = document.createElement('div');
+        banner.id = `flagged-banner-${project.id}`;
+        banner.style.cssText = `
+            position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+            background: linear-gradient(135deg, rgba(180,40,50,0.96), rgba(120,20,30,0.96));
+            border: 1px solid rgba(255,100,100,0.4);
+            color: #ffd0d0; padding: 14px 20px; border-radius: 14px;
+            font-size: 14px; font-weight: 500; z-index: 99998;
+            max-width: 420px; width: 90%; text-align: center;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+            display: flex; flex-direction: column; gap: 6px;
+        `;
+        banner.innerHTML = `
+            <span style="font-size:16px;">⚠️ Proyecto dado de baja</span>
+            <span style="opacity:0.85;font-size:13px;">
+                <strong style="color:#fff;">"${project.title}"</strong> fue removido del feed
+                por acumular reportes de la comunidad. Revisá la descripción y
+                condiciones de colaboración antes de volver a publicarlo.
+            </span>
+            <button onclick="this.parentElement.remove()" style="
+                margin-top:4px; background:rgba(255,255,255,0.12);
+                border:none; color:#ffd0d0; border-radius:8px;
+                padding:4px 12px; cursor:pointer; font-size:12px;">
+                Entendido
+            </button>
+        `;
+        document.body.appendChild(banner);
+    }
 
     window.handleSwipe = handleSwipe;
     window.setupSwipeHandlers = setupSwipeHandlers;
@@ -928,6 +1010,18 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('btn-dislike')?.addEventListener('click', () => triggerSwipe('left'));
     document.getElementById('btn-like')?.addEventListener('click', () => triggerSwipe('right'));
     document.getElementById('btn-expand')?.addEventListener('click', () => triggerSwipe('up'));
+
+    // ── Atajos de teclado (solo desktop) ─────────────────────
+    document.addEventListener('keydown', (e) => {
+        // No activar si hay un input, textarea o modal abierto
+        const tag = document.activeElement?.tagName;
+        if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+        if (document.querySelector('.expanded-card:not(.hidden)')) return;
+
+        if (e.key === 'ArrowLeft')  { e.preventDefault(); triggerSwipe('left'); }
+        if (e.key === 'ArrowRight') { e.preventDefault(); triggerSwipe('right'); }
+        if (e.key === 'ArrowUp')    { e.preventDefault(); triggerSwipe('up'); }
+    });
 
     // ── Notificaciones de match e interés en tiempo real ─────
     async function initMatchNotifications() {

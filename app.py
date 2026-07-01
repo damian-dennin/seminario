@@ -246,20 +246,25 @@ def bio():
 def get_projects():
     if 'user_id' not in session:
         return jsonify({'error': 'No autorizado'}), 401
+
     all_projects = sb_get('projects')
+
+    already_seen = sb_get('interests', {
+        'user_id': f'eq.{session["user_id"]}',
+        'select':  'project_id'
+    })
+    seen_ids = {i['project_id'] for i in already_seen}
 
     def is_hidden(p):
         return p.get('moderation_status') in ('flagged', 'hidden')
 
-    visible_projects = [
+    visible = [
         p for p in all_projects
-        if p.get('creator_id') != session['user_id'] and not is_hidden(p)
+        if p.get('creator_id') != session['user_id']
+        and not is_hidden(p)
+        and p['id'] not in seen_ids
     ]
-    # Si todos los proyectos pertenecen al usuario actual (caso demo/seed),
-    # devolvemos igualmente el catálogo para no dejar el feed vacío
-    # (pero siempre filtrando los flagged/hidden por moderación).
-    fallback = [p for p in all_projects if not is_hidden(p)]
-    return jsonify(visible_projects or fallback)
+    return jsonify(visible)
 
 
 @app.route('/api/projects/<int:project_id>')
@@ -349,7 +354,9 @@ def search_projects():
         if query in project.get('title', '').lower():
             return True
         for tech in project.get('technologies', []):
-            if query in tech.get('name', '').lower():
+            # Soporta tanto {name, icon} como string plano
+            tech_name = tech.get('name', '') if isinstance(tech, dict) else str(tech)
+            if query in tech_name.lower():
                 return True
         for skill in project.get('skills_needed', []):
             if query in skill.lower():
@@ -590,6 +597,15 @@ def reject_candidate(interest_id):
     if 'user_id' not in session:
         return jsonify({'error': 'No autorizado'}), 401
 
+    interests = sb_get('interests', {'id': f'eq.{interest_id}'})
+    if not interests:
+        return jsonify({'error': 'Interés no encontrado'}), 404
+
+    project_id = interests[0].get('project_id')
+    projects = sb_get('projects', {'id': f'eq.{project_id}'})
+    if not projects or projects[0].get('creator_id') != session['user_id']:
+        return jsonify({'error': 'No tenés permiso'}), 403
+
     sb_update('interests', {'id': f'eq.{interest_id}'}, {'status': 'rejected'})
     return jsonify({'message': 'Candidato rechazado'}), 200
 
@@ -646,10 +662,16 @@ def get_messages(match_id):
 
     messages = sb_get('messages', {'match_id': f'eq.{match_id}', 'order': 'created_at.asc'})
 
-    for msg in messages:
-        users = sb_get('users', {'id': f'eq.{msg["sender_id"]}'})
+    # Resolver nombres de senders en una sola pasada (evita N+1)
+    sender_ids = list({msg['sender_id'] for msg in messages if msg.get('sender_id')})
+    sender_cache = {}
+    for sid in sender_ids:
+        users = sb_get('users', {'id': f'eq.{sid}'})
         if users:
-            msg['sender_name'] = f"{users[0]['firstName']} {users[0]['lastName']}"
+            sender_cache[sid] = f"{users[0]['firstName']} {users[0]['lastName']}"
+
+    for msg in messages:
+        msg['sender_name'] = sender_cache.get(msg.get('sender_id'), 'Usuario')
 
     return jsonify(messages)
 
@@ -671,6 +693,8 @@ def send_message(match_id):
     content = body.get('content', '').strip()
     if not content:
         return jsonify({'error': 'El mensaje no puede estar vacío'}), 400
+    if len(content) > 2000:
+        return jsonify({'error': 'El mensaje no puede superar los 2000 caracteres'}), 400
 
     message = sb_insert('messages', {
         'match_id':  match_id,
@@ -806,4 +830,5 @@ def get_report_count(project_id):
 
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    debug_mode = os.environ.get('FLASK_DEBUG', 'false').lower() == 'true'
+    app.run(debug=debug_mode, host='0.0.0.0', port=5000)

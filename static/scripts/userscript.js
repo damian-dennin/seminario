@@ -275,23 +275,132 @@ async function loadUserProjects() {
                    </span>`
                 : '';
 
+            const flaggedBanner = project.moderation_status === 'flagged'
+                ? `<div style="background:rgba(180,40,50,0.25);border:1px solid rgba(255,100,100,0.3);
+                              border-radius:8px;padding:6px 10px;margin-bottom:8px;font-size:0.78rem;color:#ffaaaa;">
+                       ⚠️ Dado de baja por reportes de la comunidad
+                   </div>`
+                : '';
+
             card.innerHTML = `
+                ${flaggedBanner}
                 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
                     <strong style="font-size:0.95rem;">${escapeHtml(project.title)}</strong>
                     ${candidateBadge}
                 </div>
-                <div style="font-size:0.8rem;opacity:0.6;margin-bottom:8px;">
-                    ${escapeHtml(project.stats?.type || '')} · ${escapeHtml(project.stats?.language || '')} · ${escapeHtml(project.stats?.duration || '')}
+                <div style="font-size:0.8rem;opacity:0.6;margin-bottom:10px;">
+                    ${escapeHtml(project.stats?.org_type || '')} · ${escapeHtml(project.stats?.language || '')} · ${escapeHtml(project.stats?.duration || '')}
                 </div>
-                <div style="background:rgba(255,255,255,0.1);border-radius:4px;height:6px;overflow:hidden;">
-                    <div style="background:linear-gradient(90deg,#667eea,#764ba2);height:100%;width:${project.progress || 0}%;transition:width 0.5s;"></div>
+                <div style="display:flex;gap:8px;">
+                    <button onclick="openEditProjectModal(${JSON.stringify(project).replace(/"/g, '&quot;')})"
+                        style="flex:1;padding:6px;border-radius:8px;border:1px solid rgba(194,123,255,0.4);
+                               background:rgba(97,58,103,0.35);color:#e8d0ff;font-size:0.8rem;cursor:pointer;">
+                        ✏️ Editar
+                    </button>
+                    <button onclick="deleteProject(${project.id})"
+                        style="padding:6px 10px;border-radius:8px;border:1px solid rgba(255,80,80,0.3);
+                               background:rgba(120,30,30,0.3);color:#ffaaaa;font-size:0.8rem;cursor:pointer;">
+                        🗑️
+                    </button>
                 </div>
-                <div style="font-size:0.75rem;opacity:0.5;margin-top:4px;text-align:right;">${project.progress || 0}% completado</div>
             `;
             container.appendChild(card);
         });
     } catch (e) {
         container.innerHTML = '<p style="opacity:0.5;font-size:0.9rem;">Error cargando proyectos.</p>';
+    }
+}
+
+// ── Modal de edición de proyecto ────────────────────────────────────────────
+
+function openEditProjectModal(project) {
+    const modal = document.getElementById('edit-project-modal');
+    if (!modal) return;
+
+    // Poblar campos
+    modal.querySelector('#ep-id').value        = project.id;
+    modal.querySelector('#ep-title').value     = project.title || '';
+    modal.querySelector('#ep-description').value = project.description || '';
+    modal.querySelector('#ep-technologies').value = (project.technologies || [])
+        .map(t => (typeof t === 'string' ? t : t.name)).join(', ');
+    modal.querySelector('#ep-skills').value    = (project.skills_needed || []).join(', ');
+    modal.querySelector('#ep-objectives').value = (project.objectives || []).join('\n');
+    modal.querySelector('#ep-team').value      = project.stats?.team_size || '';
+    modal.querySelector('#ep-duration').value  = project.stats?.duration || '';
+    modal.querySelector('#ep-language').value  = project.stats?.language || '';
+    modal.querySelector('#ep-org').value       = project.stats?.org_type || '';
+
+    modal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeEditProjectModal() {
+    const modal = document.getElementById('edit-project-modal');
+    if (modal) modal.classList.add('hidden');
+    document.body.style.overflow = '';
+}
+
+async function saveEditProject() {
+    const modal = document.getElementById('edit-project-modal');
+    const id    = modal.querySelector('#ep-id').value;
+    const saveBtn = modal.querySelector('#ep-save-btn');
+
+    const payload = {
+        title:       modal.querySelector('#ep-title').value.trim(),
+        description: modal.querySelector('#ep-description').value.trim(),
+        technologies: modal.querySelector('#ep-technologies').value
+            .split(',').map(s => s.trim()).filter(Boolean)
+            .map(name => ({ name, icon: name.substring(0, 4) })),
+        skills_needed: modal.querySelector('#ep-skills').value.split(',').map(s => s.trim()).filter(Boolean),
+        objectives:  modal.querySelector('#ep-objectives').value.split('\n').map(s => s.trim()).filter(Boolean),
+        stats: {
+            team_size: modal.querySelector('#ep-team').value.trim(),
+            duration:  modal.querySelector('#ep-duration').value.trim(),
+            language:  modal.querySelector('#ep-language').value.trim(),
+            org_type:  modal.querySelector('#ep-org').value,
+        }
+    };
+
+    if (!payload.title) { alert('El título es obligatorio.'); return; }
+
+    saveBtn.disabled = true;
+    saveBtn.textContent = 'Guardando...';
+
+    try {
+        const r = await fetch(`/api/projects/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+        });
+
+        if (r.ok) {
+            closeEditProjectModal();
+            loadUserProjects(); // refrescar lista
+        } else {
+            const err = await r.json();
+            alert(err.error || 'Error al guardar.');
+        }
+    } catch {
+        alert('Error de red al guardar.');
+    } finally {
+        saveBtn.disabled = false;
+        saveBtn.textContent = 'Guardar';
+    }
+}
+
+async function deleteProject(projectId) {
+    if (!confirm('¿Eliminar este proyecto? Esta acción no se puede deshacer.')) return;
+
+    try {
+        const r = await fetch(`/api/projects/${projectId}`, { method: 'DELETE' });
+        if (r.ok) {
+            loadUserProjects();
+        } else {
+            const err = await r.json();
+            alert(err.error || 'Error al eliminar.');
+        }
+    } catch {
+        alert('Error de red.');
     }
 }
 
@@ -1154,14 +1263,18 @@ function makeReadOnly() {
     
     document.querySelectorAll('.stat-value input').forEach(input => {
         const parent = input.parentNode;
-        parent.innerHTML = input.value;
+        parent.textContent = input.value;
     });
-    
+
     const textarea = document.querySelector('textarea');
     if (textarea) {
         const p = document.createElement('p');
         p.className = 'section-content';
-        p.innerHTML = textarea.value.replace(/\n/g, '<br>');
+        // Usamos textContent + nodos de texto para los saltos de línea (evita XSS)
+        textarea.value.split('\n').forEach((line, i, arr) => {
+            p.appendChild(document.createTextNode(line));
+            if (i < arr.length - 1) p.appendChild(document.createElement('br'));
+        });
         textarea.replaceWith(p);
     }
     
@@ -1184,8 +1297,8 @@ function makeReadOnly() {
             const techDetails = techItem.querySelector('.tech-details');
             if (nameInput.value.trim() && levelSelect.value) {
                 techDetails.innerHTML = `
-                    <span class="tech-name">${nameInput.value}</span>
-                    <span class="tech-level">${levelSelect.value}</span>
+                    <span class="tech-name">${escapeHtml(nameInput.value)}</span>
+                    <span class="tech-level">${escapeHtml(levelSelect.value)}</span>
                 `;
             } else {
                 techItem.remove(); 
