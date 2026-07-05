@@ -1,10 +1,4 @@
-function escapeHtml(text) {
-    return String(text ?? '')
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;');
-}
+// escapeHtml provisto por sidebar.js
 
 document.addEventListener('DOMContentLoaded', () => {
     let candidates = [];
@@ -67,74 +61,7 @@ document.addEventListener('DOMContentLoaded', () => {
     sidebarTrigger?.addEventListener('mouseenter', () => sidebar.classList.add('active'));
     sidebar?.addEventListener('mouseleave', () => sidebar.classList.remove('active'));
 
-    const settingsPanel = document.createElement('div');
-    settingsPanel.id = 'settings-panel';
-    settingsPanel.style.cssText = `
-        display: none;
-        position: fixed;
-        inset: 0;
-        background: rgba(0,0,0,0.55);
-        backdrop-filter: blur(4px);
-        z-index: 9999;
-        align-items: center;
-        justify-content: center;
-    `;
-    settingsPanel.innerHTML = `
-        <div style="
-            background: linear-gradient(155deg, rgba(58,20,80,0.98), rgba(35,5,58,0.98));
-            border: 1px solid rgba(194,123,255,0.22);
-            border-radius: 22px;
-            padding: 28px 28px 22px;
-            min-width: 260px;
-            max-width: 320px;
-            width: 90%;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
-            text-align: center;
-            color: #f3e8ff;
-        ">
-            <h3 style="margin-bottom:22px;font-size:1.1rem;font-weight:700;letter-spacing:0.02em;">Configuración</h3>
-            <button id="settings-logout-btn" style="
-                width:100%; padding:12px; margin-bottom:12px;
-                background: rgba(200,60,70,0.18);
-                color: #ffb3ba;
-                border: 1px solid rgba(220,80,90,0.4);
-                border-radius:12px; cursor:pointer; font-size:0.95rem;
-                font-weight:600; font-family:inherit;">
-                Cerrar sesión
-            </button>
-            <p style="font-size:0.78rem;color:rgba(244,232,255,0.42);margin-bottom:14px;">Más opciones — próximamente</p>
-            <button id="settings-close-btn" style="
-                background: rgba(255,255,255,0.07);
-                border: 1px solid rgba(255,255,255,0.14);
-                color: rgba(244,232,255,0.7);
-                border-radius:10px;
-                padding: 8px 20px;
-                cursor:pointer; font-size:0.85rem; width:100%; font-family:inherit;">
-                Cancelar
-            </button>
-        </div>
-    `;
-    document.body.appendChild(settingsPanel);
-
-    settingsPanel.addEventListener('click', (e) => {
-        if (e.target === settingsPanel) settingsPanel.style.display = 'none';
-    });
-
-    document.querySelectorAll('.menu-icon.gear').forEach((button) => {
-        button.style.cursor = 'pointer';
-        button.addEventListener('click', () => {
-            settingsPanel.style.display = 'flex';
-        });
-    });
-
-    document.getElementById('settings-close-btn')?.addEventListener('click', () => {
-        settingsPanel.style.display = 'none';
-    });
-
-    document.getElementById('settings-logout-btn')?.addEventListener('click', async () => {
-        await fetch('/api/logout', { method: 'POST' });
-        window.location.href = '/';
-    });
+    // Settings panel provisto por sidebar.js
 
     async function loadCandidates() {
         const r = await fetch('/api/interests/candidates');
@@ -263,7 +190,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function rejectCandidate() {
         const candidate = candidates[currentIndex];
-        await fetch(`/api/interests/${candidate.interest_id}/reject`, { method: 'POST' });
+        try {
+            const r = await fetch(`/api/interests/${candidate.interest_id}/reject`, { method: 'POST' });
+            if (!r.ok) console.warn('No se pudo guardar el rechazo:', await r.text());
+        } catch (e) {
+            console.warn('Error de red al rechazar candidato:', e);
+        }
         nextCandidate();
     }
 
