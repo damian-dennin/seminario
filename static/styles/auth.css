@@ -867,3 +867,25 @@ body.dark-mode .intro-text {
         font-size: 1.8rem;
     }
 }
+
+.theme-toggle-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.menu-icon.theme {
+    width: 22px;
+    height: 22px;
+    display: inline-block;
+    background-color: var(--violetaOscuro);
+    --svg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23000' d='M12 3a1 1 0 0 1 1 1v1.05a1 1 0 1 1-2 0V4a1 1 0 0 1 1-1m6.36 2.64a1 1 0 0 1 0 1.41l-.74.74a1 1 0 0 1-1.41-1.41l.74-.74a1 1 0 0 1 1.41 0M21 11a1 1 0 1 1 0 2h-1.05a1 1 0 1 1 0-2zM7.79 6.21a1 1 0 0 1-1.41 1.41l-.74-.74a1 1 0 1 1 1.41-1.41zM6.05 12a1 1 0 1 1 0 2H5a1 1 0 1 1 0-2zm11.57 4.95l.74.74a1 1 0 0 1-1.41 1.41l-.74-.74a1 1 0 1 1 1.41-1.41M12 18a6 6 0 1 0 0-12a6 6 0 0 0 0 12m0-2a4 4 0 1 1 0-8a4 4 0 0 1 0 8m-5.62.95a1 1 0 0 1 1.41 0a1 1 0 0 1 0 1.41l-.74.74a1 1 0 1 1-1.41-1.41zM12 18.95a1 1 0 0 1 1 1V21a1 1 0 1 1-2 0v-1.05a1 1 0 0 1 1-1'/%3E%3C/svg%3E");
+    -webkit-mask-image: var(--svg);
+    mask-image: var(--svg);
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    mask-position: center;
+    -webkit-mask-size: contain;
+    mask-size: contain;
+}
