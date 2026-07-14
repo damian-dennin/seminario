@@ -405,11 +405,18 @@ body.dark-mode .form-input::placeholder {
 /* Password input container */
 .password-input-container {
     position: relative;
+    width: 100%;
+}
+
+.password-input-container .form-input {
+    width: 100%;
+    padding-right: 3rem;
+    box-sizing: border-box;
 }
 
 .password-toggle {
     position: absolute;
-    right: 15px;
+    right: 12px;
     top: 50%;
     transform: translateY(-50%);
     background: none;
@@ -467,6 +474,16 @@ body.dark-mode .password-toggle {
     cursor: pointer;
     font-size: 0.9rem;
     color: #666;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.terms-prefix {
+    display: inline-block;
+}
+
+.terms-link {
+    margin-left: 2px;
 }
 
 body.dark-mode .checkbox-container {
