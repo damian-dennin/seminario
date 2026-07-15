@@ -121,6 +121,7 @@ class AuthManager {
             username: formData.get('username'),
             birthDate: formData.get('birthDate'),
             password: formData.get('password'),
+            bio: formData.get('bio'),
             skills: formData.get('skills'),
             languages: formData.get('languages'),
             objectives: this.collectDynamicListValues('objectivesList'),
@@ -205,6 +206,13 @@ class AuthManager {
         const birthDate = document.getElementById('birthDate').value;
         if (!birthDate) {
             document.getElementById('birthDateError').textContent = 'La fecha de nacimiento es requerida';
+            isValid = false;
+        }
+
+        // Validar sobre mí
+        const bio = document.getElementById('bio').value.trim();
+        if (!bio) {
+            document.getElementById('bioError').textContent = 'El sobre mí es requerido';
             isValid = false;
         }
 
@@ -400,7 +408,7 @@ class AuthManager {
     clearRegisterErrors() {
         const registerErrors = [
             'firstNameError', 'lastNameError', 'registerEmailError', 
-            'usernameError', 'birthDateError', 'registerPasswordError', 'confirmPasswordError'
+            'usernameError', 'birthDateError', 'bioError', 'registerPasswordError', 'confirmPasswordError'
         ];
         registerErrors.forEach(errorId => {
             const errorElement = document.getElementById(errorId);

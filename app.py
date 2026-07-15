@@ -95,9 +95,9 @@ def register():
     try:
         data = request.get_json()
 
-        required_fields = ['firstName', 'lastName', 'email', 'username', 'password', 'birthDate']
+        required_fields = ['firstName', 'lastName', 'email', 'username', 'password', 'birthDate', 'bio']
         for field in required_fields:
-            if field not in data or not data[field]:
+            if field not in data or not str(data[field]).strip():
                 return jsonify({'error': f'El campo {field} es requerido'}), 400
 
         # Verificar duplicados
@@ -121,7 +121,7 @@ def register():
             'linkedin':       data.get('linkedin', ''),
             'github':         data.get('github', ''),
             'portfolio':      data.get('portfolio', ''),
-            'bio':            data.get('bio', ''),
+            'bio':            data['bio'].strip(),
             'status':         'Disponible',
             'objectives':      data.get('objectives', []),
             'certifications': data.get('certifications', []),
