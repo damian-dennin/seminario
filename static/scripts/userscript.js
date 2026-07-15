@@ -31,6 +31,26 @@ document.addEventListener('DOMContentLoaded', () => {
     // Agregar al inicio del archivo, después de las variables globales existentes
 let userData = null;
 
+    function getProfileDisplayName(data) {
+        const firstName = String(data?.firstName ?? data?.first_name ?? data?.nombre ?? '').trim();
+        const lastName = String(data?.lastName ?? data?.last_name ?? '').trim();
+        const fallbackName = String(data?.username ?? data?.email ?? 'Tu perfil').trim();
+
+        return [firstName, lastName].filter(Boolean).join(' ') || fallbackName;
+    }
+
+    function clearProfileLoadingState() {
+        const cardTitle = document.querySelector('.card-title');
+        if (cardTitle) {
+            cardTitle.classList.remove('bio-loading-anim');
+        }
+
+        const cardDesc = document.querySelector('.card-description');
+        if (cardDesc) {
+            cardDesc.classList.remove('bio-loading-anim');
+        }
+    }
+
     function setPageChromeHidden(hidden) {
         document.body.classList.toggle('feed-chrome-hidden', hidden);
         if (hidden && sidebar.classList.contains('active')) {
@@ -58,9 +78,11 @@ async function loadUserData() {
             populateUserInterface();
         } else {
             console.error('Error al cargar datos del usuario');
+            clearProfileLoadingState();
         }
     } catch (error) {
         console.error('Error de conexión:', error);
+        clearProfileLoadingState();
     }
 }
 
@@ -68,17 +90,14 @@ async function loadUserData() {
 function populateUserInterface() {
     if (!userData) return;
 
+    clearProfileLoadingState();
+
+    const displayName = getProfileDisplayName(userData);
+
     // Actualizar título/nombre en la tarjeta principal
     const cardTitle = document.querySelector('.card-title');
     if (cardTitle) {
-        cardTitle.textContent = `${userData.firstName} ${userData.lastName}`;
-        cardTitle.classList.remove('bio-loading-anim');
-    }
-
-    // Quitar animación de carga en la descripción
-    const cardDesc = document.querySelector('.card-description');
-    if (cardDesc) {
-        cardDesc.classList.remove('bio-loading-anim');
+        cardTitle.textContent = displayName;
     }
 
     // Foto de perfil o avatar con iniciales
@@ -111,7 +130,7 @@ function populateUserInterface() {
     // Actualizar título en vista expandida
     const expandedTitle = document.querySelector('.expanded-title');
     if (expandedTitle) {
-        expandedTitle.textContent = `${userData.firstName} ${userData.lastName}`;
+        expandedTitle.textContent = displayName;
     }
 
     // Actualizar estado de disponibilidad
@@ -141,8 +160,10 @@ function populateUserInterface() {
 
     // Actualizar descripción de la tarjeta
     const cardDescription = document.querySelector('.card-description');
-    if (cardDescription && userData.bio) {
-        cardDescription.textContent = userData.bio;
+    if (cardDescription) {
+        cardDescription.textContent = userData.bio?.trim()
+            ? userData.bio
+            : 'Todavía no completaste tu bio.';
     }
 
     // Actualizar información de contacto
@@ -166,8 +187,10 @@ function populateUserInterface() {
 
     // Actualizar bio en la sección "Sobre Mí"
     const sectionContent = document.querySelector('.section-content');
-    if (sectionContent && userData.bio) {
-        sectionContent.innerHTML = escapeHtml(userData.bio).replace(/\n/g, '<br>');
+    if (sectionContent) {
+        sectionContent.innerHTML = userData.bio?.trim()
+            ? escapeHtml(userData.bio).replace(/\n/g, '<br>')
+            : 'Todavía no completaste tu bio.';
     }
 
     // Actualizar habilidades técnicas
