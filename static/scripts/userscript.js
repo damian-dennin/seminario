@@ -12,6 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let expandedView = false;
 
     const card = document.getElementById('project-card');
+    const viewProfileBtn = document.getElementById('view-profile-btn');
     const sidebar = document.getElementById('sidebar');
     const sidebarTrigger = document.getElementById('sidebar-trigger');
 
@@ -439,11 +440,10 @@ function collectUserData() {
 
     // Recopilar estadísticas
     const statInputs = document.querySelectorAll('.stat-value input');
-    if (statInputs.length >= 4) {
-        updatedData.age = statInputs[0].value;
-        updatedData.birthDate = statInputs[1].value;
-        updatedData.languages = statInputs[2].value;
-        updatedData.specialization = statInputs[3].value;
+    if (statInputs.length >= 3) {
+        updatedData.birthDate = statInputs[0].value;
+        updatedData.languages = statInputs[1].value;
+        updatedData.specialization = statInputs[2].value;
     }
 
     // Recopilar bio
@@ -712,7 +712,7 @@ function showErrorMessage(message) {
 
 
     // Sidebar trigger hover handler
-    sidebarTrigger.addEventListener('mouseenter', () => {
+    sidebarTrigger?.addEventListener('mouseenter', () => {
         if (!isDragging) {
             isHoveringSidebar = true;
             sidebar.classList.add('active');
@@ -944,10 +944,15 @@ profileImages.forEach(profileImg => {
 });
 
 
-    document.querySelectorAll('.stat-value').forEach(stat => {
+    document.querySelectorAll('.stat-value').forEach((stat, index) => {
+        if (index === 0) return;
+
         const input = document.createElement('input');
-        input.type = 'text';
+        input.type = index === 1 ? 'date' : 'text';
         input.value = stat.textContent;
+        if (stat.textContent === 'N/A' || stat.textContent === '—') {
+            input.value = '';
+        }
         input.style.background = 'transparent';
         input.style.border = '1px solid rgba(255,255,255,0.3)';
         input.style.color = 'inherit';
@@ -1377,6 +1382,20 @@ function makeReadOnly() {
         card.style.transform = `translateY(${offsetY}px)`;
     }
 
+    function showExpandedProfile() {
+        expandedCard.classList.remove('hidden');
+        requestAnimationFrame(() => {
+            expandedCard.classList.add('visible');
+        });
+        expandedView = true;
+
+        card.style.transition = 'none';
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(0)';
+        card.style.transition = 'opacity 0.3s ease';
+        card.style.opacity = '1';
+    }
+
     function handleEnd() {
         if (expandedView) return;
         if (!isDragging) return;
@@ -1388,18 +1407,7 @@ function makeReadOnly() {
             card.style.transform = `translateY(-${window.innerHeight}px)`;
 
             setTimeout(() => {
-                expandedCard.classList.remove('hidden');
-                requestAnimationFrame(() => {
-                    expandedCard.classList.add('visible');
-                });
-                expandedView = true;
-
-                // Resetear la card para cuando se cierre el expandido
-                card.style.transition = 'none';
-                card.style.opacity = '0';
-                card.style.transform = 'translateY(0)';
-                card.style.transition = 'opacity 0.3s ease';
-                card.style.opacity = '1';
+                showExpandedProfile();
             }, 500);
         } else {
             // Volver a posición original
@@ -1412,6 +1420,14 @@ function makeReadOnly() {
             }, 220);
         }
     }
+
+    viewProfileBtn?.addEventListener('click', () => {
+        if (expandedView) return;
+        isDragging = false;
+        offsetY = 0;
+        setPageChromeHidden(true);
+        showExpandedProfile();
+    });
 
     function resetCard() {
         card.style.transition = 'none';

@@ -68,6 +68,19 @@ def verify_password(password, hashed_password):
     return check_password_hash(hashed_password, password)
 
 
+def calculate_age(birth_date):
+    if not birth_date:
+        return ''
+    try:
+        born = datetime.strptime(birth_date, '%Y-%m-%d').date()
+    except (TypeError, ValueError):
+        return ''
+
+    today = datetime.now().date()
+    age = today.year - born.year - ((today.month, today.day) < (born.month, born.day))
+    return age if age >= 0 else ''
+
+
 # ============================================================
 # RUTAS DE AUTENTICACIÓN
 # ============================================================
@@ -82,7 +95,7 @@ def register():
     try:
         data = request.get_json()
 
-        required_fields = ['firstName', 'lastName', 'email', 'username', 'password']
+        required_fields = ['firstName', 'lastName', 'email', 'username', 'password', 'birthDate']
         for field in required_fields:
             if field not in data or not data[field]:
                 return jsonify({'error': f'El campo {field} es requerido'}), 400
@@ -100,7 +113,7 @@ def register():
             'username':       data['username'],
             'password':       hash_password(data['password']),
             'skills':         data.get('skills', '').split(',') if isinstance(data.get('skills'), str) and data.get('skills') else [],
-            'age':            data.get('age', ''),
+            'age':            calculate_age(data.get('birthDate', '')),
             'birthDate':      data.get('birthDate', ''),
             'languages':      data.get('languages', ''),
             'specialization': data.get('specialization', ''),
@@ -110,6 +123,7 @@ def register():
             'portfolio':      data.get('portfolio', ''),
             'bio':            data.get('bio', ''),
             'status':         'Disponible',
+            'objectives':      data.get('objectives', []),
             'certifications': data.get('certifications', []),
             'interests':      data.get('interests', []),
         }
@@ -193,7 +207,7 @@ def update_user_profile():
     try:
         data = request.get_json()
         allowed_fields = [
-            'firstName', 'lastName', 'age', 'birthDate', 'languages',
+            'firstName', 'lastName', 'birthDate', 'languages',
             'specialization', 'phone', 'linkedin', 'github', 'portfolio',
             'bio', 'skills', 'certifications', 'interests', 'status',
             'objectives', 'photo_url'
@@ -205,6 +219,9 @@ def update_user_profile():
                     update_data[field] = [s.strip() for s in data[field].split(',') if s.strip()]
                 else:
                     update_data[field] = data[field]
+
+        if 'birthDate' in data:
+            update_data['age'] = calculate_age(data.get('birthDate'))
 
         update_data['updated_at'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         user = sb_update('users', {'id': f'eq.{session["user_id"]}'}, update_data)

@@ -335,6 +335,26 @@
             cursor: grabbing;
         }
 
+        .view-profile-btn {
+            width: 100%;
+            border: 1px solid rgba(255, 255, 255, 0.24);
+            background: rgba(255, 255, 255, 0.12);
+            color: #f3e8ff;
+            padding: 12px 14px;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.22s ease, border-color 0.22s ease, transform 0.22s ease;
+            margin-top: 14px;
+        }
+
+        .view-profile-btn:hover {
+            background: rgba(194, 123, 255, 0.24);
+            border-color: rgba(255, 255, 255, 0.42);
+            transform: translateY(-1px);
+        }
+
         .card-title {
             text-align: center;
             font-size: 20px;

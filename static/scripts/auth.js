@@ -25,6 +25,8 @@ class AuthManager {
             registerForm.addEventListener('submit', (e) => this.handleRegister(e));
         }
 
+        this.setupRegisterDynamicLists();
+
         // Event listeners para validación en tiempo real
         const registerPassword = document.getElementById('registerPassword');
         const confirmPassword = document.getElementById('confirmPassword');
@@ -117,8 +119,12 @@ class AuthManager {
             lastName: formData.get('lastName'),
             email: formData.get('email'),
             username: formData.get('username'),
+            birthDate: formData.get('birthDate'),
             password: formData.get('password'),
-            skills: formData.get('skills')
+            skills: formData.get('skills'),
+            languages: formData.get('languages'),
+            objectives: this.collectDynamicListValues('objectivesList'),
+            certifications: this.collectDynamicListValues('certificationsList')
         };
 
         this.showLoading(true);
@@ -192,6 +198,13 @@ class AuthManager {
             isValid = false;
         } else if (username.length < 3) {
             document.getElementById('usernameError').textContent = 'El nombre de usuario debe tener al menos 3 caracteres';
+            isValid = false;
+        }
+
+        // Validar fecha de nacimiento
+        const birthDate = document.getElementById('birthDate').value;
+        if (!birthDate) {
+            document.getElementById('birthDateError').textContent = 'La fecha de nacimiento es requerida';
             isValid = false;
         }
 
@@ -387,7 +400,7 @@ class AuthManager {
     clearRegisterErrors() {
         const registerErrors = [
             'firstNameError', 'lastNameError', 'registerEmailError', 
-            'usernameError', 'registerPasswordError', 'confirmPasswordError'
+            'usernameError', 'birthDateError', 'registerPasswordError', 'confirmPasswordError'
         ];
         registerErrors.forEach(errorId => {
             const errorElement = document.getElementById(errorId);
@@ -395,6 +408,49 @@ class AuthManager {
                 errorElement.textContent = '';
             }
         });
+    }
+
+    setupRegisterDynamicLists() {
+        const addObjectiveBtn = document.getElementById('addObjectiveBtn');
+        const addCertificationBtn = document.getElementById('addCertificationBtn');
+
+        if (addObjectiveBtn) {
+            addObjectiveBtn.addEventListener('click', () => {
+                this.addRegisterListItem('objectivesList', 'Nuevo objetivo profesional...');
+            });
+        }
+
+        if (addCertificationBtn) {
+            addCertificationBtn.addEventListener('click', () => {
+                this.addRegisterListItem('certificationsList', 'Nombre de la certificación - Institución (Año)');
+            });
+        }
+    }
+
+    addRegisterListItem(listId, placeholder) {
+        const list = document.getElementById(listId);
+        if (!list) return;
+
+        const item = document.createElement('div');
+        item.className = 'dynamic-list-item';
+
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.className = 'form-input dynamic-list-input';
+        input.placeholder = placeholder;
+
+        item.appendChild(input);
+        list.appendChild(item);
+        input.focus();
+    }
+
+    collectDynamicListValues(listId) {
+        const list = document.getElementById(listId);
+        if (!list) return [];
+
+        return Array.from(list.querySelectorAll('input'))
+            .map(input => input.value.trim())
+            .filter(Boolean);
     }
 
     isValidEmail(email) {

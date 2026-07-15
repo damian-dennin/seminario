@@ -404,6 +404,47 @@ body.dark-mode .form-input::placeholder {
     color: #aaa;
 }
 
+.dynamic-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.dynamic-list-item {
+    display: flex;
+    width: 100%;
+}
+
+.dynamic-list-input {
+    width: 100%;
+}
+
+.register-add-btn {
+    align-self: flex-start;
+    background: rgba(97, 58, 103, 0.08);
+    border: 2px dashed rgba(97, 58, 103, 0.28);
+    color: var(--violetaOscuro);
+    padding: 10px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-top: 10px;
+    transition: all 0.3s ease;
+}
+
+.register-add-btn:hover {
+    background: rgba(194, 123, 255, 0.16);
+    border-color: rgba(97, 58, 103, 0.45);
+    transform: translateY(-1px);
+}
+
+body.dark-mode .register-add-btn {
+    background: rgba(255,255,255,0.08);
+    border-color: rgba(212, 189, 232, 0.35);
+    color: var(--violetaClaro);
+}
+
 /* Password input container */
 .password-input-container {
     position: relative;
